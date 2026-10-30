@@ -14,22 +14,27 @@ The goal isn't to compete with anything, but to understand how an OS actually wo
 - [ ] Scheduler
 - [ ] Basic userland
 
+## Supported architectures
+
+The ultimate goal is having the OS be supported on the most common architectures, but for now these architectures are supported:
+
+- **x86_64**
+
 ## Getting Started
 
 ### Prerequisites
 
-Clone the repository:
+Supported build platforms are:
+- **Linux**
+- **MacOS**
+
+First you'll need to clone the repository:
 ```sh
 git clone https://github.com/ggjorven/milli.git
 ```
 
-Before we can get started we must // TODO: ...
-
-Supported platforms are:
-- **Linux**
-  - x86_64
-
-// TODO: ...
+To be able to build and run this OS we must have some tools installed.
+Follow the instructions for your platform set in [DEPENDENCIES.md](./doc/DEPENDENCIES.md).
 
 ### Building
 

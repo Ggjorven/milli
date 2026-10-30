@@ -36,17 +36,11 @@ git clone https://github.com/ggjorven/milli.git
 To be able to build and run this OS we must have some tools installed.
 Follow the instructions for your platform set in [DEPENDENCIES.md](./doc/DEPENDENCIES.md).
 
-### Building
+### Building, testing & running
 
-Build instructions for this project can be found in the [BUILDING.md](./doc/BUILDING.md) file.
-
-### Testing
-
-Test instructions for this project can be found in the [TESTING.md](./doc/TESTING.md) file.
-
-### Running
-
-Run instructions for this project can be found in the [RUNNING.md](./doc/RUNNING.md) file.
+- [Build instructions](./doc/BUILDING.md)
+- [Test instructions](./doc/TESTING.md)
+- [Run instructions](./doc/RUNNING.md)
 
 ## License
 

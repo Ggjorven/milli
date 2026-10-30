@@ -26,7 +26,8 @@ milli/
 │   │   ├── arch.hpp           the arch:: interface the portable code uses
 │   │   └── x86_64/            io, cpu, gdt, idt, apic, paging, context switch (.S),
 │   │                          string.cpp (rep movsb), linker.ld
-│   ├── lib/                   freestanding "libk": kprintf, string utils, containers, bitmap
+│   ├── lib/                   freestanding "libk": kprintf, string utils, containers
+│   ├── bitmap/                physical memory manager
 │   ├── debug/                 panic, logging, assert, stack traces
 │   ├── mm/                    pmm, vmm, heap
 │   ├── sched/                 threads, scheduler, locks

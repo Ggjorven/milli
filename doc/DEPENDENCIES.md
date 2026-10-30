@@ -15,13 +15,13 @@ Install GCC's build prerequisites for your distribution:
 
 ```sh
 # Debian / Ubuntu
-sudo apt install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo curl
+sudo apt install build-essential bison flex libgmp3-dev libisl-dev libmpc-dev libmpfr-dev texinfo curl
 
 # Fedora
-sudo dnf install gcc gcc-c++ make bison flex gmp-devel libmpc-devel mpfr-devel texinfo curl
+sudo dnf install gcc gcc-c++ libstdc++-devel make bison flex gmp-devel isl-devel libmpc-devel mpfr-devel texinfo curl
 
 # Arch Linux
-sudo pacman -S base-devel bison flex gmp libmpc mpfr texinfo curl
+sudo pacman -S base-devel bison flex gmp isl libmpc mpfr texinfo curl
 ```
 
 ### MacOS
@@ -29,7 +29,7 @@ sudo pacman -S base-devel bison flex gmp libmpc mpfr texinfo curl
 Install GCC's build prerequisites with [Homebrew](https://brew.sh/):
 
 ```sh
-brew install bison flex gmp libmpc mpfr make texinfo curl
+brew install bison flex gmp isl libmpc mpfr make texinfo curl
 ```
 
 The script uses Homebrew's GNU Make (`gmake`) on macOS.

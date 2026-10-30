@@ -49,7 +49,7 @@ This project is licensed under the **MIT LICENSE**. See [LICENSE](./LICENSE.txt)
 
 ## Contributing
 
-Contributions are welcome! Please fork the repository and create a pull request with your changes.
+Contributions are highly appreciated, please follow the contributing guidelines stated in [CONTRIBUTING.md](./CONTRIBUTING.md) to make a quality contribution.
 
 ## Acknowledgements
 

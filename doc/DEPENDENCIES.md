@@ -55,6 +55,11 @@ After having installed the prerequisites for your OS we can start building the c
     Set `SOURCE_DIR` to the location where all source can be cloned and built.
     Finally set the `INSTALL_LOCATION` to the location where the binary will end up.
 
+4. Now run the script:
+    ```sh
+    ./scripts/build-cross-compiler.sh
+    ```
+
 The script logs each download, configuration, build, and installation step.
 Set `JOBS` to choose a different number of parallel build jobs, or `MAKE` to use a specific GNU Make executable.
 

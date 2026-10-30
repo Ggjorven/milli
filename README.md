@@ -18,6 +18,11 @@ The goal isn't to compete with anything, but to understand how an OS actually wo
 
 ### Prerequisites
 
+Clone the repository:
+```sh
+git clone https://github.com/ggjorven/milli.git
+```
+
 Before we can get started we must // TODO: ...
 
 Supported platforms are:

@@ -47,9 +47,9 @@ After having installed the prerequisites for your OS we can start building the c
 
 3. We can almost start building the compiler, first we need to set some configuration variables:
     ```sh
-    ARCH=x86_64
-    SOURCE_DIR="$HOME/src/cross-compiler"
-    INSTALL_LOCATION="$HOME/opt/cross-compilers"
+    export ARCH=x86_64
+    export SOURCE_DIR="$HOME/src/cross-compiler"
+    export INSTALL_LOCATION="$HOME/opt/cross-compilers"
     ```
     Replace `ARCH` with your desired outcome architecture (ex. **x86_64**).
     Set `SOURCE_DIR` to the location where all source can be cloned and built.

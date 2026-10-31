@@ -4,7 +4,6 @@ Checks: >
   cert-*,
   clang-analyzer-*,
   cppcoreguidelines-*,
-  misc-*,
   modernize-*,
   performance-*,
   portability-*,

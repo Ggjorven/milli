@@ -15,6 +15,7 @@ AllowShortLambdasOnASingleLine: Inline
 
 IndentCaseLabels: true
 IndentAccessModifiers: false
+NamespaceIndentation: All
 AccessModifierOffset: -4
 
 PointerAlignment: Left

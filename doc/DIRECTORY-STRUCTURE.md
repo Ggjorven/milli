@@ -16,8 +16,11 @@ milli/
 │   └── syscall.hpp            kernel <-> userspace
 │
 ├── boot/                      everything that runs BEFORE kernel_main
-│   ├── limine/                limine.conf, limine_boot.cpp
-│   └── uefi/                  custom loader
+│   ├── limine/                Limine configuration and protocol integration
+│   │   ├── limine.conf
+│   │   └── arch/x86_64/       x86_64 Limine handoff code
+│   └── uefi/                  custom UEFI loader
+│       └── arch/x86_64/       x86_64 UEFI entry and platform setup
 │
 ├── kernel/                    the kernel
 │   ├── CMakeLists.txt

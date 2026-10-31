@@ -66,7 +66,7 @@ endif()
 # ----------------------------------------------------------------
 # add_subdirectory(abi)
 add_subdirectory(boot)
-# add_subdirectory(kernel)
+add_subdirectory(kernel)
 # add_subdirectory(userland)
 # add_subdirectory(tests)
 
@@ -123,7 +123,7 @@ else()
             COMMAND ${CMAKE_COMMAND} -E rm -rf iso_root
             COMMAND ${CMAKE_COMMAND} -E make_directory iso_root/boot/limine iso_root/EFI/BOOT
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel> iso_root/boot/kernel
-            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/kernel/limine.conf
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/boot/limine/limine.conf
             ${LIMINE_DIR}/limine-bios.sys ${LIMINE_DIR}/limine-bios-cd.bin
             ${LIMINE_DIR}/limine-uefi-cd.bin iso_root/boot/limine/
             COMMAND ${CMAKE_COMMAND} -E copy ${LIMINE_DIR}/BOOTX64.EFI ${LIMINE_DIR}/BOOTIA32.EFI
@@ -134,7 +134,7 @@ else()
             -efi-boot-part --efi-boot-image --protective-msdos-label
             iso_root -o ${ISO}
             COMMAND ${LIMINE_DIR}/limine bios-install ${ISO}
-            DEPENDS kernel ${CMAKE_CURRENT_SOURCE_DIR}/kernel/limine.conf
+            DEPENDS kernel ${CMAKE_CURRENT_SOURCE_DIR}/boot/limine/limine.conf
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             VERBATIM)
         add_custom_target(iso DEPENDS ${ISO})

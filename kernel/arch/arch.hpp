@@ -1,0 +1,4 @@
+#pragma once
+
+// Portable kernel code will use this interface for architecture operations.
+// TODO: ...

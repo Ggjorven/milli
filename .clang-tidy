@@ -23,9 +23,17 @@ CheckOptions:
   readability-identifier-naming.StructCase: CamelCase
 
   readability-identifier-naming.MemberPrefix: 'm_'
-  readability-identifier-naming.MemberCase: lower_case
+  readability-identifier-naming.MemberCase: CamelCase
+
+  readability-identifier-naming.MacroDefinitionCase: UPPER_CASE
 
   readability-identifier-naming.EnumConstantCase: CamelCase
 
-  readability-identifier-naming.MacroDefinitionCase: UPPER_CASE
-  readability-identifier-naming.ConstantCase: UPPER_CASE
+  readability-identifier-naming.ConstantPrefix: 'c_'
+  readability-identifier-naming.ConstantCase: CamelCase
+
+  readability-identifier-naming.GlobalVariablePrefix: 'g_'
+  readability-identifier-naming.GlobalVariableCase: CamelCase
+
+  readability-identifier-naming.StaticVariablePrefix: 's_'
+  readability-identifier-naming.StaticVariableCase: CamelCase

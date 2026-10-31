@@ -24,7 +24,6 @@ IndentWrappedFunctionNames: false
 NamespaceIndentation: All
 CompactNamespaces: false
 WrapNamespaceBodyWithEmptyLines: Leave
-ColumnLimit: 0
 MaxEmptyLinesToKeep: 1
 KeepEmptyLines:
   AtEndOfFile: false

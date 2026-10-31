@@ -5,9 +5,6 @@ CompileFlags:
     - "-Wpedantic"
     - "-std=c++20"
 
-Format:
-  Style: file
-
 Diagnostics:
   UnusedIncludes: Strict
 

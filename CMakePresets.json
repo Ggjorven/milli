@@ -6,7 +6,8 @@
             "name": "base",
             "hidden": true,
             "binaryDir": "${sourceDir}/build/${presetName}",
-            "toolchainFile": "${sourceDir}/cmake/toolchains/x86_64-elf.cmake"
+            "toolchainFile": "${sourceDir}/cmake/toolchains/x86_64-elf.cmake",
+            "cacheVariables": { "BOOTLOADER": "bios" }
         },
         { "name": "debug",   "inherits": "base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" } },
         { "name": "release", "inherits": "base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" } }

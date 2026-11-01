@@ -1,13 +1,7 @@
 add_library(bootloader_limine_x86_64 OBJECT
-    arch/x86_64/limine_boot.cpp
+    common/boot_info_from_limine.cpp
+    arch/x86_64/entry.cpp
+    $<TARGET_OBJECTS:bootloader_common>
 )
 
-target_compile_options(bootloader_limine_x86_64 PRIVATE
-    -ffreestanding
-    -fno-exceptions
-    -fno-rtti
-    -fno-stack-protector
-    -fno-pie
-)
-
-add_custom_target(bootloader_limine DEPENDS bootloader_limine_x86_64)
+configure_bootloader_target(bootloader_limine_x86_64)

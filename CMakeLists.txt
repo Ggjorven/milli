@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 # ----------------------------------------------------------------
 # Global
 # ----------------------------------------------------------------
-project(milli LANGUAGES CXX C)
+project(milli LANGUAGES CXX C ASM)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)

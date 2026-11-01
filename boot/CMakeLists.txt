@@ -22,8 +22,10 @@ add_subdirectory(bios)
 add_subdirectory(limine)
 add_subdirectory(uefi)
 
-add_custom_target(bootloader DEPENDS
-    bootloader_bios_x86
-    bootloader_limine_x86_64
-    bootloader_uefi_x86_64
-)
+if(BOOTLOADER STREQUAL "bios")
+    add_custom_target(bootloader DEPENDS bootloader_bios_x86)
+elseif(BOOTLOADER STREQUAL "limine")
+    add_custom_target(bootloader DEPENDS bootloader_limine_x86_64)
+elseif(BOOTLOADER STREQUAL "uefi")
+    add_custom_target(bootloader DEPENDS bootloader_uefi_x86_64)
+endif()

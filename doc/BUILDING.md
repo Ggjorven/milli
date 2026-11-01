@@ -46,7 +46,7 @@ in [DEPENDENCIES.md](./DEPENDENCIES.md).
 
 1. Configure a build with Limine enabled:
     ```sh
-    cmake --preset debug -DBUILD_WITH_LIMINE=ON
+    cmake --preset debug -DBOOTLOADER=limine
     ```
 
 2. Build the ISO image:
@@ -58,11 +58,11 @@ The ISO image is placed at `build/debug/image.iso`.
 
 ## Changing build configuration
 
-Run the configuration command again after changing CMake options. For example,
-to enable Limine for the release build:
+Run the configuration command again after changing CMake options.
+For example,to select the UEFI loader for the release build:
 
 ```sh
-cmake --preset release -DBUILD_WITH_LIMINE=ON
+cmake --preset release -DBOOTLOADER=uefi
 cmake --build --preset release
 ```
 

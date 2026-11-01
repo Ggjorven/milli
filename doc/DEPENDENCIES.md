@@ -116,9 +116,25 @@ brew install qemu
 Homebrew's QEMU package provides the UEFI firmware detected by the CMake
 configuration.
 
+## Custom UEFI ESP image
+
+The `uefi_image` target creates a FAT EFI System Partition containing `EFI/BOOT/BOOTX64.EFI`.
+It needs FAT and mtools utilities in addition to the compiler:
+
+```sh
+# Debian / Ubuntu
+sudo apt install dosfstools mtools parted
+
+# Fedora
+sudo dnf install dosfstools mtools parted
+
+# Arch
+sudo pacman -S dosfstools mtools parted
+```
+
 ## Limine ISO builds
 
-Building with `-DBUILD_WITH_LIMINE=ON` additionally requires `xorriso`.
+Building with `-DBOOTLOADER=limine` additionally requires `xorriso`.
 CMake downloads Limine automatically unless `LIMINE_DIR` points to an existing Limine binary checkout.
 
 ### Linux

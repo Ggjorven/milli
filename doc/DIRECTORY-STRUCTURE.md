@@ -11,16 +11,22 @@ milli/
 ├── cmake/                     toolchain files and CMake helpers
 │   └── toolchains/            x86_64-elf.cmake, later aarch64-elf.cmake
 │
-├── abi/                       headers shared across a boundary. types only, no code
-│   ├── boot_info.hpp          loader <-> kernel
-│   └── syscall.hpp            kernel <-> userspace
-│
-├── boot/                      everything that runs BEFORE kernel_main
-│   ├── limine/                Limine configuration and protocol integration
+├── boot/                      everything that runs before kernel_main
+│   ├── CMakeLists.txt         shared boot build settings and aggregate target
+│   ├── common/                firmware- and architecture-neutral loader logic
+│   ├── bios/                  legacy BIOS loader (x86 only)
+│   │   ├── CMakeLists.txt
+│   ├── limine/                Limine protocol integration
+│   │   ├── CMakeLists.txt
 │   │   ├── limine.conf
-│   │   └── arch/x86_64/       x86_64 Limine handoff code
+│   │   ├── common/            Limine responses -> normalized boot info
+│   │   └── arch/
+│   │       └── x86-64/ Limine entry and final handoff
 │   └── uefi/                  custom UEFI loader
-│       └── arch/x86_64/       x86_64 UEFI entry and platform setup
+│       ├── CMakeLists.txt
+│       ├── common/            architecture-independent UEFI protocol code
+│       └── arch/
+│           └── x86-64/ x86-64 UEFI ABI entry and paging setup
 │
 ├── kernel/                    the kernel
 │   ├── CMakeLists.txt

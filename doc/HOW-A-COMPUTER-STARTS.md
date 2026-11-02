@@ -37,8 +37,8 @@ The second stage often does the rest:
 - Read the filesystem to find files like the kernel (`kernel.bin`) or a config.
 - Gather information about the **memory map**, **video mode**, **disk geometry** & **drive info**.
 - Enable the **A20 line** (to be able to access more than 1MB of memory)
-- Load the kernel [*1](#Kernel-loading-nuances) (Read it from disk to memory)
-- Switch CPU modes from [16-bit real](#16-bit-real-mode) to [32-bit protected mode](#32-bit-protected-mode) or [64-bit](#64-bit-protected-mode)
+- Load the kernel ([nuance](#Kernel-loading-nuances)) (Read it from disk to memory)
+- Switch CPU modes from [16-bit real](#16-bit-real-mode) to [32-bit protected mode](#32-bit-protected-mode) or [64-bit](#64-bit-long-mode)
 - Jump to the kernel entry point and pass along memory map and boot drive
 
 #### Kernel loading nuances
@@ -72,7 +72,7 @@ Made for [80386 / i386](https://en.wikipedia.org/wiki/I386) processors:
 ### 64-bit long mode
 
 Introduced by AMD (amd64/x86-64) and later adopted by Intel:
-- 64-bit registers (`rax`, `rbx`, etc.) + 8 extra general purpose registers (`r8` to `r15`). Also 64-bit addresses, so theoretically up to 16 EB of address space (16'777'216 TB) ([*2](Address-space-nuance)).
+- 64-bit registers (`rax`, `rbx`, etc.) + 8 extra general purpose registers (`r8` to `r15`). Also 64-bit addresses, so theoretically up to 16 EB of address space (16'777'216 TB) ([nuance](#Address-space-nuance)).
 - [Paging](#Paging) is mandatory (4-level or 5-level page tables).
 - Extra features:
     - RIP-relative addressing (makes position-independent code easy).
@@ -81,8 +81,9 @@ Introduced by AMD (amd64/x86-64) and later adopted by Intel:
 
 #### Address space nuance
 
-Since [paging](#paging) is required it adds some overhead.
-Current CPUs implement 48 (4-level) or 57 bits (5-level) of virtual address space, so the real number is more like 256 TB or 128 PB.
+[Paging](#paging) uses virtual addresses and use multiple levels of indexes into tables.
+Current CPUs implement 4-levels (48-bit) or 5-levels (57-bit) of virtual address space. This means that not the full 16 EB can be used.
+The real number is more like 256 TB or 128 PB.
 
 ### GDT
 
@@ -92,13 +93,40 @@ The GDT is a table in memory that describes memory segments. Each entry is an 8-
 - **Access flags**, is it code or data, readable/writable & which privilege ring (0 to 3) it belongs to.
 - **Other flags**, 16/32-bit, whether the limit is counted in bytes or 4 KB units.
 
-Modern OSes use a [flat memory model](#Flat-memory-model) where segments cover the entire address space and effectively do nothing.
-The minimal GDT has three entries:
-- **Null descriptor** (required, all zeros, entry 0)
-- **Code segment**: base 0, limit 4 GB, executable
-- **Data segment**: base 0, limit 4 GB, writable
+#### 32-bit systems
 
-This is because even in [64-bit long mode](#64-bit-long-mode) the CPU still supports running apps in 32-bit mode, which *requires* segmentation, so we **NEED** a GDT.
+On a typical 32-bit system a GDT looks like:
+
+| Entry | Purpose |
+|---|---|
+| 0 | Null descriptor (required, zeros) |
+| 1 | Code (base 0, limit 4GB, 32-bit, ring 0) |
+| 2 | Data (base 0, limit 4GB, ring 0) |
+
+#### 64-bit systems
+
+On a typical 64-bit system a GDT looks like:
+
+| Entry | Purpose |
+|---|---|
+| 0 | Null descriptor (required, zeros) |
+| 1 | Kernel code (64-bit, ring 0) |
+| 2 | Kernel data (ring 0) |
+| 3 | User code (64-bit, ring 3) |
+| 4 | User data (ring 3) |
+| 5 | (Often) 32-bit user code, for compatibility mode apps |
+| 6-7 | [TSS](#TSS) descriptor (16 bytes, so it takes two slots) |
+
+#### 32-bit vs 64-bit
+
+| | 32-bit protected mode | 64-bit long mode |
+|---|---|---|
+| Base / Limit | Honored (but OSes set them flat) | Ignored for `cs`, `ds`, `es`, `ss` |
+| Code mode | `D` bit selects 16/32-bit code | `L` bit selects 64-bit code vs 32-bit compatibility code |
+| Privilege rings | Yes | Yes |
+| [TSS](#TSS) | Yes (could do hardware task switching) | Yes (only holds stack pointers) |
+| Thread-local data | GDT entry with a non-zero base, selected via `gs` (Linux) | `fs`/`gs` bases set through MSRs, not the GDT |
+| Restricts memory access | Yes (but OSes set them flat) | No |
 
 ### Paging
 
@@ -119,6 +147,11 @@ It helps with:
 
 The flat memory model is where the program sees memory as a single contiguous range of addresses, from 0 up to the maximum (e.g. 0 to 4 GB-1 in 32-bit).
 An address is just one number. There are no segments to think about.
+
+### TSS
+
+// TODO: Make sure it is the same on 32-bit vs 64-bit
+Task State Segment is a kernel stack pointer for ring 3 to ring 0 switches and interrupt stacks.
 
 ## References
 

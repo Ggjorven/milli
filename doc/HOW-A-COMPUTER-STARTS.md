@@ -58,7 +58,7 @@ so loading a larger kernel often involves a trick: read into a low buffer, then 
 This is what the CPU starts in for compatibility with [the original 8086](https://en.wikipedia.org/wiki/Intel_8086). It has:
 - 16 bit registers.
 - Addresses are segment:offset, giving access to only about 1 MB of RAM.
-- No memory protection, no privilige levels and no virtual memory.
+- No memory protection, no privilege levels and no virtual memory.
 - BIOS interrupts available.
 
 ### 32-bit protected mode
@@ -97,6 +97,9 @@ The GDT is a table in memory that describes memory segments. Each entry is an 8-
 
 On a typical 32-bit system a GDT looks like:
 
+> [!NOTE]
+> This is the GDT for the bootloader, the OS/kernel usually creates it's own
+
 | Entry | Purpose |
 |---|---|
 | 0 | Null descriptor (required, zeros) |
@@ -116,6 +119,8 @@ On a typical 64-bit system a GDT looks like:
 | 4 | User data (ring 3) |
 | 5 | (Often) 32-bit user code, for compatibility mode apps |
 | 6-7 | [TSS](#TSS) descriptor (16 bytes, so it takes two slots) |
+
+The CPU reads the code segment descriptors (selected by `cs`) to learn whether to run 64-bit code and at which privilege level.
 
 #### 32-bit vs 64-bit
 

@@ -1,15 +1,15 @@
 # cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-elf.cmake
-# Override the compiler with -DCMAKE_CXX_COMPILER=... if you like.
+# Override the compiler with -DCMAKE_C_COMPILER=... if you like.
 
 # Bare metal: no OS, no default libs/startfiles, compile x86_64 for architecture
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
 
-# Look for cross compiler (x86_64-elf-g++), fall back to the host g++,
-if(NOT CMAKE_CXX_COMPILER)
-    find_program(_kernel_cxx NAMES x86_64-elf-g++ g++)
-    if(_kernel_cxx)
-        set(CMAKE_CXX_COMPILER ${_kernel_cxx})
+# Look for cross compiler (x86_64-elf-gcc), fall back to the host gcc.
+if(NOT CMAKE_C_COMPILER)
+    find_program(_kernel_cc NAMES x86_64-elf-gcc gcc)
+    if(_kernel_cc)
+        set(CMAKE_C_COMPILER ${_kernel_cc})
     endif()
 endif()
 

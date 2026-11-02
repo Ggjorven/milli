@@ -14,11 +14,11 @@ target_link_options(bootloader_bios_stage1_elf PRIVATE
 # Transition makes it 64-bit
 add_executable(bootloader_bios_stage2_elf
     transition.S
-    stage2.cpp
+    stage2.c
 )
 configure_bootloader_target(bootloader_bios_stage2_elf)
 target_compile_options(bootloader_bios_stage2_elf PRIVATE
-    $<$<COMPILE_LANGUAGE:C,CXX,ASM>:-m32>
+    $<$<COMPILE_LANGUAGE:C,ASM>:-m32>
 )
 target_link_options(bootloader_bios_stage2_elf PRIVATE
     -m32 -nostdlib -no-pie

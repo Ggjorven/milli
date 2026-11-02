@@ -1,5 +1,5 @@
 add_executable(kernel
-    main.cpp
+    main.c
 )
 
 # The kernel is a freestanding ELF image: it has no C runtime, standard library

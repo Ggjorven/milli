@@ -1,8 +1,8 @@
 add_executable(bootloader_uefi_x86_64_elf
-    common/file_loader.cpp
-    common/memory_map.cpp
-    arch/x86_64/entry.cpp
-    arch/x86_64/paging.cpp
+    common/file_loader.c
+    common/memory_map.c
+    arch/x86_64/entry.c
+    arch/x86_64/paging.c
     $<TARGET_OBJECTS:bootloader_common>
 )
 

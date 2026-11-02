@@ -1,6 +1,6 @@
 add_library(bootloader_limine_x86_64 OBJECT
-    common/boot_info_from_limine.cpp
-    arch/x86_64/entry.cpp
+    common/boot_info_from_limine.c
+    arch/x86_64/entry.c
     $<TARGET_OBJECTS:bootloader_common>
 )
 

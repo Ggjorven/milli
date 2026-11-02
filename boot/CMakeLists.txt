@@ -1,18 +1,16 @@
 add_library(bootloader_common OBJECT
-    common/config.cpp
-    common/elf_loader.cpp
-    common/handoff.cpp
+    common/config.c
+    common/elf_loader.c
+    common/handoff.c
 )
 
 function(configure_bootloader_target target)
-    target_compile_features(${target} PRIVATE cxx_std_20)
+    target_compile_features(${target} PRIVATE c_std_23)
     target_include_directories(${target} PRIVATE ${PROJECT_SOURCE_DIR})
     target_compile_options(${target} PRIVATE
-        $<$<COMPILE_LANGUAGE:C,CXX>:-ffreestanding>
-        $<$<COMPILE_LANGUAGE:C,CXX>:-fno-exceptions>
-        $<$<COMPILE_LANGUAGE:C,CXX>:-fno-rtti>
-        $<$<COMPILE_LANGUAGE:C,CXX>:-fno-stack-protector>
-        $<$<COMPILE_LANGUAGE:C,CXX>:-fno-pie>
+        $<$<COMPILE_LANGUAGE:C>:-ffreestanding>
+        $<$<COMPILE_LANGUAGE:C>:-fno-stack-protector>
+        $<$<COMPILE_LANGUAGE:C>:-fno-pie>
     )
 endfunction()
 

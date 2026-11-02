@@ -30,11 +30,11 @@ milli/
 │
 ├── kernel/                    the kernel
 │   ├── CMakeLists.txt
-│   ├── main.cpp               kernel_main(): portable startup sequence
+│   ├── main.c                 kernel_main(): portable startup sequence
 │   ├── arch/
-│   │   ├── arch.hpp           the arch:: interface the portable code uses
+│   │   ├── arch.h             the arch interface the portable code uses
 │   │   └── x86_64/            io, cpu, gdt, idt, apic, paging, context switch (.S),
-│   │                          string.cpp (rep movsb), linker.ld
+│   │                          string.c (rep movsb), linker.ld
 │   ├── lib/                   freestanding "libk": kprintf, string utils, containers
 │   ├── bitmap/                physical memory manager
 │   ├── debug/                 panic, logging, assert, stack traces

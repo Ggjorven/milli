@@ -126,7 +126,7 @@ On a typical 64-bit system a GDT looks like:
 | Privilege rings | Yes | Yes |
 | [TSS](#TSS) | Yes (could do hardware task switching) | Yes (only holds stack pointers) |
 | Thread-local data | GDT entry with a non-zero base, selected via `gs` (Linux) | `fs`/`gs` bases set through MSRs, not the GDT |
-| Restricts memory access | Yes (but OSes set them flat) | No |
+| Restricts memory access | Yes (but OSes set them flat) | No (ignored) |
 
 ### Paging
 
@@ -143,15 +143,17 @@ It helps with:
 - **Fine-grained permissions**, per-page read/write/execute and user/kernel.
 - **Shared memory**, two processes can map the same physical frame (shared libraries, e.g.).
 
-### Flat memory model
-
-The flat memory model is where the program sees memory as a single contiguous range of addresses, from 0 up to the maximum (e.g. 0 to 4 GB-1 in 32-bit).
-An address is just one number. There are no segments to think about.
-
 ### TSS
 
-// TODO: Make sure it is the same on 32-bit vs 64-bit
-Task State Segment is a kernel stack pointer for ring 3 to ring 0 switches and interrupt stacks.
+The Task State Segment is a structure in memory, referenced by a descriptor in the [GDT](#gdt).
+Its most important job on modern systems is holding the kernel stack pointer the CPU switches to when moving from ring 3 to ring 0 (for example on an interrupt).
+
+- **32-bit**: also holds a full copy of the CPU state, which was used for hardware task switching. Modern OSes don't use that feature and only use the stack fields (`ss0:esp0`).
+- **64-bit**: hardware task switching was removed. It only holds the stack pointers for each ring (`rsp0`-`rsp2`) ([IST](#IST)) and an I/O permission bitmap.
+
+### IST
+
+The IST are separate stacks for specific interrupts, like double faults.
 
 ## References
 

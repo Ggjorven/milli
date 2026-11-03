@@ -34,13 +34,19 @@ git clone https://github.com/ggjorven/milli.git
 ```
 
 To be able to build and run this OS we must have some tools installed.
-Follow the instructions for your platform set in [DEPENDENCIES.md](./doc/DEPENDENCIES.md).
+Follow the instructions for your platform set in [DEPENDENCIES.md](./doc/build/DEPENDENCIES.md).
 
 ### Building, testing & running
 
-- [Build instructions](./doc/BUILDING.md)
-- [Test instructions](./doc/TESTING.md)
-- [Run instructions](./doc/RUNNING.md)
+- [Build instructions](./doc/build/BUILDING.md)
+- [Test instructions](./doc/build/TESTING.md)
+- [Run instructions](./doc/build/RUNNING.md)
+
+## Notes
+
+While researching for this project I took notes you can find under [`doc/research/`](./doc/research/). This includes:
+- [From power on to the bootloader](./doc/research/POWER-ON-TO-BOOTLOADER.md)
+- [From bootloader to the kernel](./doc/research/BOOTLOADER-TO-KERNEL.md)
 
 ## License
 

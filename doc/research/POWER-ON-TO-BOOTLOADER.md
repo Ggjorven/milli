@@ -1,4 +1,4 @@
-# How a computer starts
+# Power on to bootloader
 
 This is a very simple still high-level overview of how a computer starts
 

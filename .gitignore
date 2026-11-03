@@ -51,7 +51,7 @@
 *.dwo
 
 # CMake
-build/
+/build/
 
 **/CMakeLists.txt.user
 **/CMakeCache.txt

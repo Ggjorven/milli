@@ -2,6 +2,22 @@
 
 This is a very simple still high-level overview of how a computer starts
 
+## Table of contents
+
+- [Boot](#boot)
+- [OS search](#os-search)
+  - [Legacy boot (BIOS)](#legacy-boot-bios)
+  - [UEFI](#uefi)
+- [Glossary](#glossary)
+  - [16-bit real mode](#16-bit-real-mode)
+  - [32-bit protected mode](#32-bit-protected-mode)
+  - [64-bit long mode](#64-bit-long-mode)
+  - [GDT](#gdt)
+  - [Paging](#paging)
+  - [TSS](#tss)
+  - [IST](#ist)
+- [References](#references)
+
 ## Boot
 
 This will describe the most general steps of how a PC starts from boot.
@@ -153,7 +169,7 @@ It helps with:
 The Task State Segment is a structure in memory, referenced by a descriptor in the [GDT](#gdt).
 Its most important job on modern systems is holding the kernel stack pointer the CPU switches to when moving from ring 3 to ring 0 (for example on an interrupt).
 
-- **32-bit**: also holds a full copy of the CPU state, which was used for hardware task switching. Modern OSes don't use that feature and only use the stack fields (`ss0:esp0`).
+- **32-bit**: also holds a full copy of the CPU state, which is used for hardware task switching. (Modern OSes don't use that feature and only use the stack fields (`ss0:esp0`).)
 - **64-bit**: hardware task switching was removed. It only holds the stack pointers for each ring (`rsp0`-`rsp2`) ([IST](#IST)) and an I/O permission bitmap.
 
 ### IST

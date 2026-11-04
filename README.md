@@ -1,6 +1,6 @@
 # milli
 
-**milli** is my attempt at writing a small kernel and operating system from scratch, learning as I go with the help of resources like the OSDev wiki.
+**milli** is my attempt at writing a small bootloader, kernel and operating system from scratch. I am learning as I go with the help of resources like the OSDev wiki.
 
 The goal isn't to compete with anything, but to understand how an OS actually works by building one: booting, memory management, interrupts, scheduling, and eventually a tiny userland. Keeping it small and readable is a design goal.
 

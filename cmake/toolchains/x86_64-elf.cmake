@@ -1,11 +1,8 @@
-# cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-elf.cmake
-# Override the compiler with -DCMAKE_C_COMPILER=... if you like.
-
 # ----------------------------------------------------------------
 # Checks
 # ----------------------------------------------------------------
 if(NOT ARCHITECTURE STREQUAL "x86_64")
-	message(FATAL_ERROR "This toolchain only supports ARCHITECTURE=x86_64.")
+    message(FATAL_ERROR "This toolchain only supports ARCHITECTURE=x86_64.")
 endif()
 
 # ----------------------------------------------------------------

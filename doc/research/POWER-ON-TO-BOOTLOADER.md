@@ -5,22 +5,25 @@ This is a very simple still high-level overview of how a computer starts
 ## Table of contents
 
 - [Boot](#boot)
-- [OS search](#os-search)
-  - [Legacy boot (BIOS)](#legacy-boot-bios)
-  - [UEFI](#uefi)
-- [Glossary](#glossary)
+  - [Legacy boot (BIOS)](#Legacy-boot-BIOS)
+  - [UEFI](#UEFI)
+- [Glossary](#Glossary)
   - [16-bit real mode](#16-bit-real-mode)
   - [32-bit protected mode](#32-bit-protected-mode)
   - [64-bit long mode](#64-bit-long-mode)
-  - [GDT](#gdt)
-  - [Paging](#paging)
-  - [TSS](#tss)
-  - [IST](#ist)
+  - [GDT](#GDT)
+  - [Paging](#Paging)
+  - [TSS](#TSS)
+  - [IST](#ISt)
+  - [NVRAM](#NVRAM)
+  - [GPT](#GPT)
 - [References](#references)
 
 ## Boot
 
 This will describe the most general steps of how a PC starts from boot.
+
+### Legacy boot (BIOS)
 
 1. BIOS is copied from a ROM chip into RAM
 
@@ -28,19 +31,11 @@ This will describe the most general steps of how a PC starts from boot.
     - Initializes hardware
     - Runs some tests (POST = power-on self test)
 
-3. BIOS [searches for an operating system](#OS-search) to start.
+3. The BIOS loads the first sector (first 512 bytes) of each disk into memory (at location 0x7C00)
 
-## OS search
+4. It looks for the boot signature (0x55 0xAA) at offsets 510 and 511.
 
-This will describe how an OS is found and started.
-
-### Legacy boot (BIOS)
-
-1. The BIOS loads the first sector (first 512 bytes) of each disk into memory (at location 0x7C00)
-
-2. It looks for the boot signature (0x55 0xAA) at offsets 510 and 511.
-
-3. If found it starts executing that sector.
+5. If found it starts executing that sector.
 
 That 512 byte sector often only does:
 - (optional) Set up the segment registers and a stack.
@@ -65,7 +60,26 @@ so loading a larger kernel often involves a trick: read into a low buffer, then 
 
 ### UEFI
 
-// TODO: Future
+1. The UEFI firmware is copied from a ROM chip into RAM.
+
+2. The firmware starts running.
+    - The CPU begins in [16-bit real mode](#16-bit-real-mode), but the firmware switches it to [64-bit long mode](#64-bit-long-mode). It also enables [paging](#paging) and creates a flat [GDT](#gdt).
+    - It initializes the hardware and loads its drivers
+
+3. It reads the boot entries from [NVRAM](#NVRAM), ach entry holds a path to an `.efi` file. For example:
+    - **Windows**: `\EFI\Microsoft\Boot\bootmgfw.efi`
+    - **Fedora**: `\EFI\fedora\shimx64.efi` (loads `grubx64.efi`)
+
+4. These files live on the EFI System Partition (ESP) which is a small FAT32 partition on a [GPT](#GPT) disk. This partition shared by all installed operating systems. The firmware contains a FAT driver, so it can read the file by path without any boot sector code.
+
+5. The firmware loads the `.efi` file (a PE/COFF executable, the same format as Windows `.exe` files) into memory and calls its entry point. This is the bootloader.
+
+6. If no boot entry works (or on removable media like a USB stick), the firmware falls back to a default path: `\EFI\BOOT\BOOTX64.EFI` (on x86-64).
+
+7. With **Secure Boot** enabled, the firmware first verifies the signature of the `.efi` file against its trusted keys, and refuses to run it if the check fails.
+
+> ![NOTE]
+> You can either have BIOS boot or UEFI, not both. But most UEFI boards still add a CSM module which can emulate BIOS booting.
 
 ## Glossary
 
@@ -175,6 +189,25 @@ Its most important job on modern systems is holding the kernel stack pointer the
 ### IST
 
 The IST are separate stacks for specific interrupts, like double faults.
+
+### NVRAM
+
+NVRAM is a small persistent storage area. Most often a region on the firmware flash chip that keeps firmware settings and UEFI variables (boot entries, boot order, Secure Boot keys).
+On older BIOS systems the equivalent was CMOS RAM kept alive by the motherboard's coin cell battery.
+
+### GPT
+
+[GPT](https://en.wikipedia.org/wiki/GUID_Partition_Table) is a type of partition table a disk can use. Other examples are [MBR](https://en.wikipedia.org/wiki/Master_boot_record).
+A TODOOOOOO:
+
+High level overview:
+```
+Disk
+ ├── Partition table (GPT or MBR)
+ │    ├── Partition 1 -> filesystem: FAT32
+ │    ├── Partition 2 -> filesystem: NTFS
+ │    └── Partition 3 -> filesystem: ext4
+ ```
 
 ## References
 

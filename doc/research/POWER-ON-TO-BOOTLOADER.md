@@ -25,13 +25,13 @@ This will describe the most general steps of how a PC starts from boot.
 
 ### Legacy boot (BIOS)
 
-1. BIOS is copied from a ROM chip into RAM
+1. BIOS is copied from a ROM chip into RAM.
 
 2. BIOS starts executing code:
     - Initializes hardware
     - Runs some tests (POST = power-on self test)
 
-3. The BIOS loads the first sector (first 512 bytes) of each disk into memory (at location 0x7C00)
+3. The BIOS loads the first sector (first 512 bytes) of a disk into memory (at location 0x7C00).
 
 4. It looks for the boot signature (0x55 0xAA) at offsets 510 and 511.
 
@@ -66,11 +66,11 @@ so loading a larger kernel often involves a trick: read into a low buffer, then 
     - The CPU begins in [16-bit real mode](#16-bit-real-mode), but the firmware switches it to [64-bit long mode](#64-bit-long-mode). It also enables [paging](#paging) and creates a flat [GDT](#gdt).
     - It initializes the hardware and loads its drivers
 
-3. It reads the boot entries from [NVRAM](#NVRAM), ach entry holds a path to an `.efi` file. For example:
+3. It reads the boot entries from [NVRAM](#NVRAM), each entry holds a path to an `.efi` file. For example:
     - **Windows**: `\EFI\Microsoft\Boot\bootmgfw.efi`
     - **Fedora**: `\EFI\fedora\shimx64.efi` (loads `grubx64.efi`)
 
-4. These files live on the EFI System Partition (ESP) which is a small FAT32 partition on a [GPT](#GPT) disk. This partition shared by all installed operating systems. The firmware contains a FAT driver, so it can read the file by path without any boot sector code.
+4. These files live on the EFI System Partition (ESP) which is a small FAT (usually FAT32) partition on a [GPT](#GPT) disk. This partition is shared by all installed operating systems. The firmware contains a FAT driver, so it can read the file by path without any boot sector code.
 
 5. The firmware loads the `.efi` file (a PE/COFF executable, the same format as Windows `.exe` files) into memory and calls its entry point. This is the bootloader.
 
@@ -78,7 +78,7 @@ so loading a larger kernel often involves a trick: read into a low buffer, then 
 
 7. With **Secure Boot** enabled, the firmware first verifies the signature of the `.efi` file against its trusted keys, and refuses to run it if the check fails.
 
-> ![NOTE]
+> [!NOTE]
 > You can either have BIOS boot or UEFI, not both. But most UEFI boards still add a CSM module which can emulate BIOS booting.
 
 ## Glossary
@@ -128,7 +128,7 @@ The GDT is a table in memory that describes memory segments. Each entry is an 8-
 On a typical 32-bit system a GDT looks like:
 
 > [!NOTE]
-> This is the GDT for the bootloader, the OS/kernel usually creates it's own
+> This is the GDT for the bootloader, the OS/kernel usually creates its own.
 
 | Entry | Purpose |
 |---|---|
@@ -198,9 +198,7 @@ On older BIOS systems the equivalent was CMOS RAM kept alive by the motherboard'
 ### GPT
 
 [GPT](https://en.wikipedia.org/wiki/GUID_Partition_Table) is a type of partition table a disk can use. Other examples are [MBR](https://en.wikipedia.org/wiki/Master_boot_record).
-A TODOOOOOO:
-
-High level overview:
+A partition table is a table that describes all partitions on a disk. A high level overview:
 ```
 Disk
  ├── Partition table (GPT or MBR)

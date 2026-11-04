@@ -1,3 +1,6 @@
+# ----------------------------------------------------------------
+# Global
+# ----------------------------------------------------------------
 Checks: >
   -*,
   bugprone-*,
@@ -18,6 +21,14 @@ CheckOptions:
   readability-identifier-naming.VariableCase: lower_case
   readability-identifier-naming.ParameterCase: lower_case
 
+# ----------------------------------------------------------------
+# C
+# ----------------------------------------------------------------
+# C uses the global check and naming policy above.
+
+# ----------------------------------------------------------------
+# C++
+# ----------------------------------------------------------------
   readability-identifier-naming.ClassCase: CamelCase
   readability-identifier-naming.StructCase: CamelCase
 

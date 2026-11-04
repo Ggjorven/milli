@@ -19,6 +19,12 @@ This is a very simple still high-level overview of how a computer starts
   - [IST](#IST)
   - [NVRAM](#NVRAM)
   - [GPT](#GPT)
+  - [EFI System Table](#EFI-System-Table)
+  - [initrd](#initrd)
+  - [Memory Map](#Memory-Map)
+  - [Framebuffer](#Framebuffer)
+  - [Graphics Output Protocol](#Graphics-Output-Protocol)
+  - [ACPI Tables](#ACPI-Tables)
 - [References](#references)
 
 ## Boot
@@ -82,11 +88,23 @@ so loading a larger kernel often involves a trick: read into a low buffer, then 
 
 5. These files live on the EFI System Partition (ESP) which is a small FAT (usually FAT32) partition on a [GPT](#GPT) disk. This partition is shared by all installed operating systems. The firmware contains a FAT driver, so it can read the file by path without any boot sector code.
 
-6. The firmware loads the `.efi` file (a PE/COFF executable, the same format as Windows `.exe` files) into memory and calls its entry point. This is the bootloader.
+6. The firmware loads the `.efi` file into memory.
 
-7. If no boot entry works (or on removable media like a USB stick), the firmware falls back to a default path: `\EFI\BOOT\BOOTX64.EFI` (on x86-64).
+7. If **Secure Boot** is enabled, the firmware also verifies the signature of the `.efi` file against its trusted keys. It refuses to run it if the check fails.
 
-8. With **Secure Boot** enabled, the firmware first verifies the signature of the `.efi` file against its trusted keys, and refuses to run it if the check fails.
+8. It then calls the `.efi` bootloaders entry point.
+
+9. If no boot entry works (or on removable media like a USB stick), the firmware falls back to a default path: `\EFI\BOOT\BOOTX64.EFI` (on x86-64).
+
+The bootloader on UEFI systems often does:
+- Get the [System Table](#EFI-System-Table) pointer from the firmware.
+- Read files (kernel, config, [initrd](#initrd)) through the firmware's file protocol.
+- Load the kernel (and optionally an [initrd](#initrd)) into memory.
+- Get the [memory map](#Memory-Map) from the firmware.
+- Get a [framebuffer](#Framebuffer) from the firmware's [GOP](#Graphics-Output-Protocol).
+- Find the [ACPI Tables](#ACPI-Tables) (hardware description) through the [System Table](#EFI-System-Table).
+- Call `ExitBootServices()`. After this the firmware's boot services (disk, console, memory allocation) are gone and the bootloader owns the machine.
+- Jump to the kernel entry point and pass along the [memory map](#Memory-Map), [framebuffer](#Framebuffer) and [ACPI](#ACPI-Tables) pointer.
 
 ## Glossary
 
@@ -224,6 +242,35 @@ Disk
  │    ├── Partition 2 -> filesystem: NTFS
  │    └── Partition 3 -> filesystem: ext4
  ```
+
+ ### EFI System Table
+
+The EFI System Table is a structure in memory that the firmware builds and hands to every .efi program as an argument to its entry point:
+```c
+EFI_STATUS EFIAPI efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table);
+```
+It's essentially the program's way to find the firmware. Since a UEFI application isn't linked against anything and has no OS, there are no system calls and no libc.
+The System Table is a table of pointers to everything the firmware offers.
+
+### initrd
+
+// TODO: ...
+
+### Memory Map
+
+// TODO: ...
+
+### Framebuffer
+
+// TODO: ...
+
+### Graphics Output Protocol
+
+// TODO: ...
+
+### ACPI Tables
+
+// TODO: ...
 
 ## References
 

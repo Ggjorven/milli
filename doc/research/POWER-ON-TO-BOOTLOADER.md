@@ -8,35 +8,39 @@ This is a very simple still high-level overview of how a computer starts
   - [Legacy boot (BIOS)](#Legacy-boot-BIOS)
   - [UEFI](#UEFI)
 - [Glossary](#Glossary)
+  - [Reset vector](#Reset-vector)
+  - [Mapping memory](#Mapping-memory)
   - [16-bit real mode](#16-bit-real-mode)
   - [32-bit protected mode](#32-bit-protected-mode)
   - [64-bit long mode](#64-bit-long-mode)
   - [GDT](#GDT)
   - [Paging](#Paging)
   - [TSS](#TSS)
-  - [IST](#ISt)
+  - [IST](#IST)
   - [NVRAM](#NVRAM)
   - [GPT](#GPT)
 - [References](#references)
 
 ## Boot
 
-This will describe the most general steps of how a PC starts from boot.
+This will describe the most general steps of how a PC starts from power-on.
 
 ### Legacy boot (BIOS)
 
-1. BIOS is copied from a ROM chip into RAM.
+1. The CPU starts executing at the [reset vector](#Reset-vector) (ex. `0xFFFFFFF0` on x86). The chipset [maps](#Mapping-memory) this to the firmware flash chip on the motherboard.
 
-2. BIOS starts executing code:
-    - Initializes hardware
+2. The BIOS initializes the RAM and may then copy itself into it (for speed).
+
+3. Then the BIOS:
+    - Initializes the remaining hardware
     - Runs some tests (POST = power-on self test)
 
-3. The BIOS loads the first sector (first 512 bytes) of a devie (most likely a disk) into memory (at location 0x7C00) then:
-    - It looks for the boot signature (0x55 0xAA) at offsets 510 and 511. If found it goes to step 4.
-    - If not found it does the same with the next best device.
-    - *In what order are the devices looked through?* - This can be set in the BIOS to for example: Disk A, Disk B, USB, CD/DVD & Network boot.
+4. The BIOS goes through the devices in the configured boot order (e.g. Disk A, Disk B, USB, CD/DVD, Network). For each device it:
+    - Loads the first sector (512 bytes) to memory at `0x7C00`.
+    - Checks for the boot signature `0x55 0xAA` at offsets 510 and 511.
+    - If the signature is missing, tries the next device.
 
-4. If found it starts executing that first sector.
+5. If the signature is found, the BIOS jumps to `0x7C00` and starts executing that sector (in [16-bit real mode](#16-bit-real-mode)).
 
 That 512 byte sector often only does:
 - (optional) Set up the segment registers and a stack.
@@ -61,28 +65,41 @@ so loading a larger kernel often involves a trick: read into a low buffer, then 
 
 ### UEFI
 
-1. The UEFI firmware is copied from a ROM chip into RAM.
+1. The CPU starts executing at the [reset vector](#Reset-vector) (ex. `0xFFFFFFF0` on x86). The chipset [maps](#Mapping-memory) this to the firmware flash chip on the motherboard.
 
-2. The firmware starts running.
-    - The CPU begins in [16-bit real mode](#16-bit-real-mode), but the firmware switches it to [64-bit long mode](#64-bit-long-mode). It also enables [paging](#paging) and creates a flat [GDT](#gdt).
-    - It initializes the hardware and loads its drivers
+2. The firmware initializes the RAM and may then copy itself into it (for speed).
 
-3. It reads the boot entries from [NVRAM](#NVRAM), each entry holds a path to an `.efi` file. For example:
+3. The firmware then does:
+    - Switch from [16-bit real mode](#16-bit-real-mode) to [64-bit long mode](#64-bit-long-mode). It also enables [paging](#paging) and creates a flat [GDT](#gdt).
+    - It initializes the remaning hardware and loads its drivers.
+
+4. It reads the boot entries from [NVRAM](#NVRAM), each entry holds a path to an `.efi` file. For example:
     - **Windows**: `\EFI\Microsoft\Boot\bootmgfw.efi`
     - **Fedora**: `\EFI\fedora\shimx64.efi` (loads `grubx64.efi`)
 
-4. These files live on the EFI System Partition (ESP) which is a small FAT (usually FAT32) partition on a [GPT](#GPT) disk. This partition is shared by all installed operating systems. The firmware contains a FAT driver, so it can read the file by path without any boot sector code.
+5. These files live on the EFI System Partition (ESP) which is a small FAT (usually FAT32) partition on a [GPT](#GPT) disk. This partition is shared by all installed operating systems. The firmware contains a FAT driver, so it can read the file by path without any boot sector code.
 
-5. The firmware loads the `.efi` file (a PE/COFF executable, the same format as Windows `.exe` files) into memory and calls its entry point. This is the bootloader.
+6. The firmware loads the `.efi` file (a PE/COFF executable, the same format as Windows `.exe` files) into memory and calls its entry point. This is the bootloader.
 
-6. If no boot entry works (or on removable media like a USB stick), the firmware falls back to a default path: `\EFI\BOOT\BOOTX64.EFI` (on x86-64).
+7. If no boot entry works (or on removable media like a USB stick), the firmware falls back to a default path: `\EFI\BOOT\BOOTX64.EFI` (on x86-64).
 
-7. With **Secure Boot** enabled, the firmware first verifies the signature of the `.efi` file against its trusted keys, and refuses to run it if the check fails.
+8. With **Secure Boot** enabled, the firmware first verifies the signature of the `.efi` file against its trusted keys, and refuses to run it if the check fails.
 
 > [!NOTE]
 > You can either have BIOS boot or UEFI, not both. But most UEFI boards still add a CSM module which can emulate BIOS booting.
 
 ## Glossary
+
+### Reset vector
+
+The reset vector is the address where a CPU starts fetching its first instruction from after power-on or reset.
+It's hardwired into the CPU and differs per architecture. This is so the very first instruction has a known place to come from.
+Whoever builds the board puts the firmware at that location.
+
+### Mapping memory
+
+Mapping memory means that when the CPU reads from the mapped address, the read doesn’t go to RAM.
+A piece of hardware (the chipset) intercepts the read and answers with bytes from the mapped address instead (maybe flash memory instead of RAM).
 
 ### 16-bit real mode
 
@@ -112,7 +129,7 @@ Introduced by AMD (amd64/x86-64) and later adopted by Intel:
 
 #### Address space nuance
 
-[Paging](#paging) uses virtual addresses and use multiple levels of indexes into tables.
+[Paging](#paging) uses virtual addresses and uses multiple levels of indices into tables.
 Current CPUs implement 4-levels (48-bit) or 5-levels (57-bit) of virtual address space. This means that not the full 16 EB can be used.
 The real number is more like 256 TB or 128 PB.
 

@@ -47,6 +47,7 @@ if(MKFS_FAT AND MMD AND MCOPY AND PARTED)
     set(UEFI_ESP_IMAGE ${CMAKE_CURRENT_BINARY_DIR}/milli-uefi.img)
     set(UEFI_ESP_OFFSET_BYTES 1048576)
     set(UEFI_ESP_OFFSET_SECTORS 2048)
+
     add_custom_command(
         OUTPUT ${UEFI_ESP_IMAGE}
         COMMAND ${CMAKE_COMMAND} -E rm -f ${UEFI_ESP_IMAGE}
@@ -61,7 +62,10 @@ if(MKFS_FAT AND MMD AND MCOPY AND PARTED)
         VERBATIM
     )
     add_custom_target(uefi_image DEPENDS ${UEFI_ESP_IMAGE})
+
     set(MILLI_UEFI_ESP_IMAGE ${UEFI_ESP_IMAGE} CACHE INTERNAL "Path to the generated UEFI ESP image")
 else()
     message(STATUS "UEFI ESP image disabled: install dosfstools, mtools, and parted for the uefi_image target")
 endif()
+
+# TODO: Add back run targets

@@ -254,23 +254,29 @@ The System Table is a table of pointers to everything the firmware offers.
 
 ### initrd
 
-// TODO: ...
+The initrd (initial RAM disk) is a small filesystem image the bootloader loads into RAM next to the kernel.
+It contains the drivers and tools (storage, filesystem, encryption) needed to mount the real root filesystem, which the kernel can't read yet because those drivers live on that very disk.
+The kernel unpacks it as a temporary root, mounts the real root, then switches over to it.
 
 ### Memory Map
 
-// TODO: ...
+A list of all physical memory regions and what each is used for (usable RAM, reserved by firmware, ACPI data, memory-mapped devices).
+The kernel needs it to know which memory it may use. On BIOS it comes from `int 0x15` (function `0xE820`), on UEFI from `GetMemoryMap()`.
 
 ### Framebuffer
 
-// TODO: ...
+A region of memory where each pixel of the screen is stored. Writing to it changes what is displayed, so a kernel can draw graphics without a GPU driver.
+The bootloader gets its address, resolution and pixel format from the firmware and passes it on.
 
 ### Graphics Output Protocol
 
-// TODO: ...
+The GOP is the UEFI interface for graphics. It lets a bootloader list video modes, pick one, and get the [framebuffer](#framebuffer) address.
+It replaces VESA BIOS calls on legacy systems.
 
 ### ACPI Tables
 
-// TODO: ...
+The entry point is the RSDP (Root System Description Pointer). That is a small structure with the signature `"RSD PTR "` that points to the **XSDT**, which is a table of pointers to all other ACPI tables.
+On BIOS the OS finds it by scanning memory for the signature. On UEFI the firmware provides its address in the System Table.
 
 ## References
 

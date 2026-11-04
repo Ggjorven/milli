@@ -13,7 +13,7 @@ target_compile_options(kernel PRIVATE
 target_link_options(kernel PRIVATE
     -nostdlib
     -no-pie
-    -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/arch/x86_64/linker.ld
+    -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/arch/${ARCHITECTURE}/linker.ld
     -Wl,--build-id=none
     -Wl,-e,kernel_main
 )

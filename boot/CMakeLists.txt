@@ -2,9 +2,9 @@
 # Common
 # ----------------------------------------------------------------
 add_library(bootloader_common OBJECT
-    # common/config.c
-    # common/elf_loader.c
-    # common/handoff.c
+    common/config.c
+    common/elf_loader.c
+    common/handoff.c
 )
 
 # ----------------------------------------------------------------
@@ -25,7 +25,7 @@ configure_bootloader_target(bootloader_common)
 # ----------------------------------------------------------------
 # Common tools
 # ----------------------------------------------------------------
-find_program(QEMU qemu-system-x86_64 DOC "Path to the QEMU x86_64 emulator")
+find_program(QEMU qemu-system-${ARCHITECTURE} DOC "Path to the QEMU ${ARCHITECTURE} emulator")
 
 # Cross-platform OVMF UEFI firmware auto-discovery
 set(OVMF "" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)")

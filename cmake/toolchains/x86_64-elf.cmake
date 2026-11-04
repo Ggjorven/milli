@@ -1,8 +1,22 @@
 # cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-elf.cmake
 # Override the compiler with -DCMAKE_C_COMPILER=... if you like.
 
+# ----------------------------------------------------------------
+# Checks
+# ----------------------------------------------------------------
+if(NOT ARCHITECTURE STREQUAL "x86_64")
+	message(FATAL_ERROR "This toolchain only supports ARCHITECTURE=x86_64.")
+endif()
+
+# ----------------------------------------------------------------
+# Set defaults
+# ----------------------------------------------------------------
 # Bare metal: no OS, no default libs/startfiles, compile x86_64 for architecture
 set(CMAKE_SYSTEM_NAME Generic)
+if(NOT DEFINED ARCHITECTURE)
+    set(ARCHITECTURE x86_64 CACHE STRING "Target architecture")
+endif()
+
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
 
 # Look for cross compiler (x86_64-elf-gcc), fall back to the host gcc.

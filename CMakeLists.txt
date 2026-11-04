@@ -17,13 +17,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ----------------------------------------------------------------
 # Options
 # ----------------------------------------------------------------
+set(ARCHITECTURE "x86_64" CACHE STRING "Target architecture")
+set_property(CACHE ARCHITECTURE PROPERTY STRINGS x86_64)
+
 set(BOOTLOADER "bios" CACHE STRING "Boot path to build and run: limine, bios, or uefi")
 set_property(CACHE BOOTLOADER PROPERTY STRINGS limine bios uefi)
-
-set(SUPPORTED_BOOTLOADERS limine bios uefi)
-if(NOT BOOTLOADER IN_LIST SUPPORTED_BOOTLOADERS)
-    message(FATAL_ERROR "Invalid BOOTLOADER='${BOOTLOADER}'. Choose limine, bios, or uefi.")
-endif()
 
 # ----------------------------------------------------------------
 # Checks
@@ -37,6 +35,22 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         "or use a Linux/macOS host system to configure and build.\n"
         "======================================================================\n"
     )
+endif()
+
+set(SUPPORTED_ARCHITECTURES x86_64)
+if(NOT ARCHITECTURE IN_LIST SUPPORTED_ARCHITECTURES)
+    message(FATAL_ERROR
+        "Invalid ARCHITECTURE='${ARCHITECTURE}'. Choose: ${SUPPORTED_ARCHITECTURES}.")
+endif()
+
+set(SUPPORTED_BOOTLOADERS limine bios uefi)
+if(NOT BOOTLOADER IN_LIST SUPPORTED_BOOTLOADERS)
+    message(FATAL_ERROR "Invalid BOOTLOADER='${BOOTLOADER}'. Choose limine, bios, or uefi.")
+endif()
+
+if(BOOTLOADER STREQUAL "bios" AND NOT ARCHITECTURE STREQUAL "x86_64")
+    message(FATAL_ERROR
+        "BOOTLOADER=bios requires ARCHITECTURE=x86_64, legacy BIOS is an x86-only boot path.")
 endif()
 
 # ----------------------------------------------------------------

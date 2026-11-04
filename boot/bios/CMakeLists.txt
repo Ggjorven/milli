@@ -1,3 +1,5 @@
+# Legacy BIOS is x86 only
+
 # ----------------------------------------------------------------
 # Assembly executable (16-bit) (512 bytes)
 # ----------------------------------------------------------------
@@ -44,13 +46,13 @@ set(BIOS_IMAGE ${CMAKE_CURRENT_BINARY_DIR}/milli-bios.img)
 add_custom_command(
     OUTPUT ${BIOS_STAGE1_BIN}
     COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:bootloader_bios_stage1> ${BIOS_STAGE1_BIN}
-    DEPENDS bootloader_bios_stage1
+    DEPENDS bootloader_bios_stage1_elf
     VERBATIM
 )
 add_custom_command(
     OUTPUT ${BIOS_STAGE2_BIN}
     COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:bootloader_bios_stage2> ${BIOS_STAGE2_BIN}
-    DEPENDS bootloader_bios_stage2
+    DEPENDS bootloader_bios_stage2_elf
     VERBATIM
 )
 

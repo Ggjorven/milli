@@ -59,10 +59,10 @@ That 512 byte sector often only does:
 The second stage often does the rest:
 - Set up the segment registers and a stack.
 - Save the boot drive number (the BIOS sets it in the `dl` register).
-- Read the filesystem to find files like the kernel (`kernel.bin`) or a config.
+- Read the filesystem to find files like the kernel, config, [initrd](#initrd).
 - Gather information about the **memory map**, **video mode**, **disk geometry** & **drive info**.
 - Enable the **A20 line** (to be able to access more than 1MB of memory)
-- Load the kernel ([nuance](#Kernel-loading-nuances)) (Read it from disk to memory)
+- Load the kernel ([nuance](#Kernel-loading-nuances)) & optionally [initrd](#initrd)
 - Switch CPU modes from [16-bit real](#16-bit-real-mode) to [32-bit protected mode](#32-bit-protected-mode) or [64-bit](#64-bit-long-mode)
 - Jump to the kernel entry point and pass along memory map and boot drive
 
@@ -143,7 +143,7 @@ Introduced by AMD (amd64/x86-64) and later adopted by Intel:
 - Extra features:
     - RIP-relative addressing (makes position-independent code easy).
     - `syscall`/`sysret` instructions.
-    - the `nx` (no-execute) bit for security.
+    - the `NX` (no-execute) bit for security.
 
 #### Address space nuance
 
@@ -243,9 +243,9 @@ Disk
  │    └── Partition 3 -> filesystem: ext4
  ```
 
- ### EFI System Table
+### EFI System Table
 
-The EFI System Table is a structure in memory that the firmware builds and hands to every .efi program as an argument to its entry point:
+The EFI System Table is a structure in memory that the firmware builds and hands to every `.efi` program as an argument to its entry point:
 ```c
 EFI_STATUS EFIAPI efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table);
 ```

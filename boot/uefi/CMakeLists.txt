@@ -1,3 +1,6 @@
+# ----------------------------------------------------------------
+# Assembly executable (16-bit) (512 bytes)
+# ----------------------------------------------------------------
 add_executable(bootloader_uefi_x86_64_elf
     common/file_loader.c
     common/memory_map.c
@@ -20,7 +23,7 @@ target_link_options(bootloader_uefi_x86_64_elf PRIVATE
 )
 
 # CMAKE_OBJCOPY belongs to the ELF cross toolchain and usually cannot emit PE.
-find_program(UEFI_OBJCOPY NAMES x86_64-w64-mingw32-objcopy objcopy mingw-objcopy REQUIRED)
+find_program(UEFI_OBJCOPY NAMES x86_64-w64-mingw32-objcopy mingw-objcopy objcopy REQUIRED)
 
 # UEFI firmware loads a PE/COFF application. Use objcopy to convert from freestanding ELF to PE32+
 set(UEFI_APPLICATION ${CMAKE_CURRENT_BINARY_DIR}/BOOTX64.EFI)

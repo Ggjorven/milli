@@ -31,11 +31,12 @@ This will describe the most general steps of how a PC starts from boot.
     - Initializes hardware
     - Runs some tests (POST = power-on self test)
 
-3. The BIOS loads the first sector (first 512 bytes) of a disk into memory (at location 0x7C00).
+3. The BIOS loads the first sector (first 512 bytes) of a devie (most likely a disk) into memory (at location 0x7C00) then:
+    - It looks for the boot signature (0x55 0xAA) at offsets 510 and 511. If found it goes to step 4.
+    - If not found it does the same with the next best device.
+    - *In what order are the devices looked through?* - This can be set in the BIOS to for example: Disk A, Disk B, USB, CD/DVD & Network boot.
 
-4. It looks for the boot signature (0x55 0xAA) at offsets 510 and 511.
-
-5. If found it starts executing that sector.
+4. If found it starts executing that first sector.
 
 That 512 byte sector often only does:
 - (optional) Set up the segment registers and a stack.

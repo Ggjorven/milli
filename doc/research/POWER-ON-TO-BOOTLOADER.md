@@ -25,6 +25,9 @@ This is a very simple still high-level overview of how a computer starts
 
 This will describe the most general steps of how a PC starts from power-on.
 
+> [!NOTE]
+> A PC can either have BIOS boot or UEFI, not both. But most UEFI boards still add a CSM module which can emulate BIOS booting.
+
 ### Legacy boot (BIOS)
 
 1. The CPU starts executing at the [reset vector](#Reset-vector) (ex. `0xFFFFFFF0` on x86). The chipset [maps](#Mapping-memory) this to the firmware flash chip on the motherboard.
@@ -84,9 +87,6 @@ so loading a larger kernel often involves a trick: read into a low buffer, then 
 7. If no boot entry works (or on removable media like a USB stick), the firmware falls back to a default path: `\EFI\BOOT\BOOTX64.EFI` (on x86-64).
 
 8. With **Secure Boot** enabled, the firmware first verifies the signature of the `.efi` file against its trusted keys, and refuses to run it if the check fails.
-
-> [!NOTE]
-> You can either have BIOS boot or UEFI, not both. But most UEFI boards still add a CSM module which can emulate BIOS booting.
 
 ## Glossary
 

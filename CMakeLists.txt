@@ -40,31 +40,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 # ----------------------------------------------------------------
-# Build limine helper tool (optional)
+# Limine helper tool (optional)
 # ----------------------------------------------------------------
 if(BOOTLOADER STREQUAL "limine")
-    set(LIMINE_BRANCH "v11.x-binary" CACHE STRING "Limine binary-release branch/tag to fetch")
-    set(LIMINE_DIR    "" CACHE PATH "Existing Limine binary checkout (empty = fetch it)")
-
-    if(NOT LIMINE_DIR)
-        include(FetchContent)
-        FetchContent_Declare(limine
-            GIT_REPOSITORY https://github.com/limine-bootloader/limine.git
-            GIT_TAG        ${LIMINE_BRANCH}
-            GIT_SHALLOW    TRUE
-            SOURCE_SUBDIR  _no_cmake_here
-        )
-        FetchContent_MakeAvailable(limine)
-        set(LIMINE_DIR ${limine_SOURCE_DIR})
-    endif()
-
-    find_program(MAKE_TOOL NAMES make gmake)
-    if(NOT EXISTS ${LIMINE_DIR}/limine AND EXISTS ${LIMINE_DIR}/Makefile AND MAKE_TOOL)
-        execute_process(COMMAND ${MAKE_TOOL} -C ${LIMINE_DIR} RESULT_VARIABLE _exit_code)
-        if(NOT _exit_code EQUAL 0)
-            message(WARNING "Building the limine tool failed; the 'iso' target won't work")
-        endif()
-    endif()
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/tools/build-limine.cmake)
 endif()
 
 # ----------------------------------------------------------------

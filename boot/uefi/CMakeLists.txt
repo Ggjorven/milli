@@ -11,9 +11,7 @@ endif()
 set(UEFI_TARGET bootloader_uefi_elf)
 
 add_executable(${UEFI_TARGET}
-    $<TARGET_OBJECTS:bootloader_common>
     common/file_loader.c
-    common/memory_map.c
 )
 
 configure_bootloader_target(${UEFI_TARGET})
@@ -41,31 +39,17 @@ find_program(PARTED NAMES parted)
 find_program(DD_TOOL NAMES dd REQUIRED)
 
 # ----------------------------------------------------------------
-# Create the UEFI ESP image
+# Export variables
 # ----------------------------------------------------------------
-if(MKFS_FAT AND MMD AND MCOPY AND PARTED)
-    set(UEFI_ESP_IMAGE ${CMAKE_CURRENT_BINARY_DIR}/milli-uefi.img)
-    set(UEFI_ESP_OFFSET_BYTES 1048576)
-    set(UEFI_ESP_OFFSET_SECTORS 2048)
+set(UEFI_EFI ${CMAKE_CURRENT_BINARY_DIR}/milli.efi)
 
-    add_custom_command(
-        OUTPUT ${UEFI_ESP_IMAGE}
-        COMMAND ${CMAKE_COMMAND} -E rm -f ${UEFI_ESP_IMAGE}
-        COMMAND ${DD_TOOL} if=/dev/zero of=${UEFI_ESP_IMAGE} bs=1M count=32
-        COMMAND ${PARTED} -s ${UEFI_ESP_IMAGE}
-                mklabel gpt mkpart EFI FAT32 1MiB 100% set 1 esp on
-        COMMAND ${MKFS_FAT} -F 32 --offset=${UEFI_ESP_OFFSET_SECTORS} ${UEFI_ESP_IMAGE}
-        COMMAND ${MMD} -i ${UEFI_ESP_IMAGE}@@${UEFI_ESP_OFFSET_BYTES} ::/EFI ::/EFI/BOOT
-        COMMAND ${MCOPY} -i ${UEFI_ESP_IMAGE}@@${UEFI_ESP_OFFSET_BYTES}
-                ${UEFI_APPLICATION} ::/${UEFI_BOOT_PATH}
-        DEPENDS ${UEFI_APPLICATION_TARGET}
-        VERBATIM
-    )
-    add_custom_target(uefi_image DEPENDS ${UEFI_ESP_IMAGE})
-
-    set(MILLI_UEFI_ESP_IMAGE ${UEFI_ESP_IMAGE} CACHE INTERNAL "Path to the generated UEFI ESP image")
-else()
-    message(STATUS "UEFI ESP image disabled: install dosfstools, mtools, and parted for the uefi_image target")
-endif()
-
-# TODO: Add back run targets
+# ----------------------------------------------------------------
+# Convert ELF to EFI
+# ----------------------------------------------------------------
+add_custom_command(
+    OUTPUT ${UEFI_EFI}
+    COMMAND ${UEFI_OBJCOPY} -O pei-x86-64 --subsystem 10
+            $<TARGET_FILE:${UEFI_TARGET}> ${UEFI_EFI}
+    DEPENDS ${UEFI_TARGET}
+    VERBATIM
+)

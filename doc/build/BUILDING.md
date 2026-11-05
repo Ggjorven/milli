@@ -38,31 +38,20 @@ To build an optimized release version, use the `release` preset instead.
 
 The build files and output are placed in `build/release`.
 
-## Limine ISO build
-
-By default **milli** is configured for the custom bootloader. To build a
-bootable ISO using Limine, first make sure `xorriso` is installed as described
-in [DEPENDENCIES.md](./DEPENDENCIES.md).
-
-1. Configure a build with Limine enabled:
-    ```sh
-    cmake --preset debug -DBOOTLOADER=limine
-    ```
-
-2. Build the ISO image:
-    ```sh
-    cmake --build --preset debug --target iso
-    ```
-
-The ISO image is placed at `build/debug/image.iso`.
-
 ## Changing build configuration
 
 Run the configuration command again after changing CMake options.
-For example,to select the UEFI loader for the release build:
+For example, to select the UEFI loader for the release build:
 
 ```sh
 cmake --preset release -DBOOTLOADER=uefi
+cmake --build --preset release
+```
+
+or switch the output architecture:
+
+```sh
+cmake --preset release -DARCHITECTURE=x86_64
 cmake --build --preset release
 ```
 

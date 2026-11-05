@@ -51,9 +51,14 @@ The BIOS image is an MBR-partitioned disk with this layout:
 
 | Sector | Contents |
 | -- | -- |
-| `0` | MBR: stage-1 code, partition table & 0x55AA signature |
+| `0` | MBR: stage-1 code (446 bytes), partition table & 0x55AA signature |
 | `1-2047` | Stage-2 code |
 | `2048+` | FAT 32 partition: <br>├── /BOOT/KERNEL.ELF<br>└── /BOOT/INITRD.CPI |
+
+The MBR layout fixes the stage-1 bootstrap area at 446 bytes even though a sector is 512 bytes.
+The partition table on MBR contains four 16-byte entries (64 bytes), the boot signature is 2 bytes (`0x55AA`).
+Only one of these 4 partitions is used (the FAT 32 partition).
+Therefore the available code space is `512 - (4 * 16) - 2 = 446` bytes.
 
 For the BIOS image, CMake currently does this order:
 

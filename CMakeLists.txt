@@ -20,8 +20,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(ARCHITECTURE "x86_64" CACHE STRING "Target architecture")
 set_property(CACHE ARCHITECTURE PROPERTY STRINGS x86_64)
 
-set(BOOTLOADER "bios" CACHE STRING "Boot path to build and run: limine, bios, or uefi")
-set_property(CACHE BOOTLOADER PROPERTY STRINGS limine bios uefi)
+set(BOOTLOADER "bios" CACHE STRING "Boot path to build and run: bios or uefi")
+set_property(CACHE BOOTLOADER PROPERTY STRINGS bios uefi)
 
 # ----------------------------------------------------------------
 # Checks
@@ -43,9 +43,9 @@ if(NOT ARCHITECTURE IN_LIST SUPPORTED_ARCHITECTURES)
         "Invalid ARCHITECTURE='${ARCHITECTURE}'. Choose: ${SUPPORTED_ARCHITECTURES}.")
 endif()
 
-set(SUPPORTED_BOOTLOADERS limine bios uefi)
+set(SUPPORTED_BOOTLOADERS bios uefi)
 if(NOT BOOTLOADER IN_LIST SUPPORTED_BOOTLOADERS)
-    message(FATAL_ERROR "Invalid BOOTLOADER='${BOOTLOADER}'. Choose limine, bios, or uefi.")
+    message(FATAL_ERROR "Invalid BOOTLOADER='${BOOTLOADER}'. Choose bios or uefi.")
 endif()
 
 if(BOOTLOADER STREQUAL "bios" AND NOT ARCHITECTURE STREQUAL "x86_64")
@@ -58,6 +58,7 @@ endif()
 # ----------------------------------------------------------------
 # add_subdirectory(abi)
 add_subdirectory(boot)
+add_subdirectory(initrd)
 add_subdirectory(kernel)
 # add_subdirectory(userland)
 # add_subdirectory(tests)

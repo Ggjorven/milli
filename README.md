@@ -26,7 +26,7 @@ The ultimate goal is having the OS be supported on the most common architectures
 
 Supported build platforms are:
 - **Linux**
-- **MacOS**
+- **MacOS**\*
 
 First you'll need to clone the repository:
 ```sh
@@ -35,6 +35,9 @@ git clone https://github.com/ggjorven/milli.git
 
 To be able to build and run this OS we must have some tools installed.
 Follow the instructions for your platform set in [DEPENDENCIES.md](./doc/build/DEPENDENCIES.md).
+
+\*:
+MacOS can only build the BIOS target because `parted` cannot be installed on macOS, see [#621579](https://superuser.com/questions/621579/install-gparted-on-a-mac-with-homebrew-or-macports).
 
 ### Building, testing & running
 

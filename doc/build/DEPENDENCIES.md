@@ -80,7 +80,7 @@ x86_64-elf-g++ --version
 
 Or whatever cross-compiler you built.
 
-## QEMU & UEFI firmware
+## QEMU, UEFI tools & firmware
 
 After installing the cross-compiler, install the emulator and UEFI firmware
 for the target architecture you want to run. Add a new target as another
@@ -94,71 +94,29 @@ Install all the tools need for your wanted architecture.
 
 ```sh
 # Debian / Ubuntu
-sudo apt install qemu-system-x86 ovmf
+sudo apt install qemu-system-x86 ovmf dosfstools mtools parted
 
 # Fedora
-sudo dnf install qemu-system-x86 edk2-ovmf
+sudo dnf install qemu-system-x86 edk2-ovmf dosfstools mtools parted
 
 # Arch Linux
-sudo pacman -S qemu-desktop edk2-ovmf
+sudo pacman -S qemu-desktop edk2-ovmf dosfstools mtools parted
 ```
 
 ### MacOS
 
 Install all the tools need for your wanted architecture with [Homebrew](https://brew.sh/).
 
+> [!IMPORTANT]
+> The UEFI image target cannot be built on MacOS at this moment because `parted` cannot be installed, see: [#621579](https://superuser.com/questions/621579/install-gparted-on-a-mac-with-homebrew-or-macports).
+
 #### x86_64 target
 
 ```sh
-brew install qemu
+brew install qemu dosfstools mtools
 ```
 
-Homebrew's QEMU package provides the UEFI firmware detected by the CMake
-configuration.
-
-## Custom UEFI ESP image
-
-The `uefi_image` target creates a FAT EFI System Partition containing `EFI/BOOT/BOOTX64.EFI`.
-It needs FAT and mtools utilities in addition to the compiler:
-
-```sh
-# Debian / Ubuntu
-sudo apt install dosfstools mtools parted
-
-# Fedora
-sudo dnf install dosfstools mtools parted
-
-# Arch
-sudo pacman -S dosfstools mtools parted
-```
-
-## Limine ISO builds
-
-Building with `-DBOOTLOADER=limine` additionally requires `xorriso`.
-CMake downloads Limine automatically unless `LIMINE_DIR` points to an existing Limine binary checkout.
-
-### Linux
-
-Install `xorriso` for your distribution:
-
-```sh
-# Debian / Ubuntu
-sudo apt install xorriso
-
-# Fedora
-sudo dnf install xorriso
-
-# Arch Linux
-sudo pacman -S xorriso
-```
-
-### MacOS
-
-Install `xorriso` with [Homebrew](https://brew.sh/):
-
-```sh
-brew install xorriso
-```
+Homebrew's QEMU package provides the UEFI firmware detected by the CMake configuration.
 
 ## Check the full installation
 

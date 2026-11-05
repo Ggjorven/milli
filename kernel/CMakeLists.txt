@@ -1,9 +1,10 @@
+# ----------------------------------------------------------------
+# Kernel ELF Executable
+# ----------------------------------------------------------------
 add_executable(kernel
     main.c
 )
 
-# The kernel is a freestanding ELF image: it has no C runtime, standard library
-# or host-provided entry point.
 target_compile_options(kernel PRIVATE
     -ffreestanding
     -fno-stack-protector
@@ -18,6 +19,4 @@ target_link_options(kernel PRIVATE
     -Wl,-e,kernel_main
 )
 
-set_target_properties(kernel PROPERTIES
-    OUTPUT_NAME kernel
-)
+set_target_properties(kernel PROPERTIES OUTPUT_NAME kernel)

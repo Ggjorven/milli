@@ -62,3 +62,64 @@ add_subdirectory(boot)
 add_subdirectory(kernel)
 # add_subdirectory(userland)
 # add_subdirectory(tests)
+
+# ----------------------------------------------------------------
+# Common tools
+# ----------------------------------------------------------------
+find_program(QEMU qemu-system-x86_64 DOC "Path to the QEMU x86_64 emulator")
+
+if(NOT QEMU)
+    message(WARNING "run and run-debug targets are not available because qemu cannot be found on your system."
+endif()
+
+# Cross-platform OVMF UEFI firmware auto-discovery
+set(OVMF "" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)")
+if(NOT OVMF)
+    if(EXISTS "/usr/share/ovmf/OVMF.fd")
+        set(OVMF "/usr/share/ovmf/OVMF.fd")                         # Ubuntu/Debian
+    elseif(EXISTS "/usr/share/edk2/ovmf/OVMF_CODE.fd")
+        set(OVMF "/usr/share/edk2/ovmf/OVMF_CODE.fd")               # Fedora
+    elseif(EXISTS "/usr/share/edk2/x64/OVMF_CODE.fd")
+        set(OVMF "/usr/share/edk2/x64/OVMF_CODE.fd")                # Arch
+    elseif(EXISTS "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")
+        set(OVMF "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")    # MacOS Homebrew
+    else()
+        set(OVMF "OVMF.fd" CACHE FILEPATH "Path to UEFI firmware image")
+    endif()
+endif()
+
+# ----------------------------------------------------------------
+# Combine bootloader, initrd & kernel
+# ----------------------------------------------------------------
+if(BOOTLOADER STREQUAL "bios")
+
+elseif(BOOTLOADER STREQUAL "uefi")
+
+endif()
+
+# ----------------------------------------------------------------
+# Create run and run-debug targets (TODO)
+# ----------------------------------------------------------------
+# if(BOOTLOADER STREQUAL "bios" AND QEMU)
+#     set(QEMU_COMMON_ARGS -M q35 -m 512M -serial stdio -no-reboot -no-shutdown)
+#
+#     add_custom_target(run
+#         COMMAND ${QEMU} ${QEMU_COMMON_ARGS} -drive format=raw,file=${MILLI_BIOS_IMAGE}
+#         DEPENDS bios_image
+#         USES_TERMINAL)
+#     add_custom_target(debug
+#         COMMAND ${QEMU} ${QEMU_COMMON_ARGS} -drive format=raw,file=${MILLI_BIOS_IMAGE} -s -S
+#         DEPENDS bios_image
+#         USES_TERMINAL)
+# elseif(BOOTLOADER STREQUAL "uefi" AND QEMU)
+#     set(QEMU_COMMON_ARGS -M q35 -m 512M -serial stdio -no-reboot -no-shutdown)
+#
+#     add_custom_target(run
+#         COMMAND ${QEMU} ${QEMU_COMMON_ARGS} -bios ${OVMF} -drive format=raw,file=${MILLI_UEFI_ESP_IMAGE}
+#         DEPENDS uefi_image
+#         USES_TERMINAL)
+#     add_custom_target(debug
+#         COMMAND ${QEMU} ${QEMU_COMMON_ARGS} -bios ${OVMF} -drive format=raw,file=${MILLI_UEFI_ESP_IMAGE} -s -S
+#         DEPENDS uefi_image
+#         USES_TERMINAL)
+# endif()

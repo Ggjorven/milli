@@ -1,22 +1,32 @@
 # ----------------------------------------------------------------
-# Kernel ELF Executable
+# Checks
 # ----------------------------------------------------------------
-add_executable(kernel
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/arch/${ARCHITECTURE}/CMakeLists.txt")
+    message(FATAL_ERROR "Kernel does not support ARCHITECTURE=${ARCHITECTURE}.")
+endif()
+
+# ----------------------------------------------------------------
+# Shared Kernel Executable
+# ----------------------------------------------------------------
+set(KERNEL_TARGET kernel_elf)
+add_executable(${KERNEL_TARGET}
     main.c
 )
 
-target_compile_options(kernel PRIVATE
+target_compile_options(${KERNEL_TARGET} PRIVATE
     -ffreestanding
     -fno-stack-protector
     -fno-pie
 )
 
-target_link_options(kernel PRIVATE
+target_link_options(${KERNEL_TARGET} PRIVATE
     -nostdlib
     -no-pie
-    -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/arch/${ARCHITECTURE}/linker.ld
     -Wl,--build-id=none
     -Wl,-e,kernel_main
 )
 
-set_target_properties(kernel PROPERTIES OUTPUT_NAME kernel)
+# ----------------------------------------------------------------
+# General target
+# ----------------------------------------------------------------
+add_custom_target(kernel ALL DEPENDS kernel_elf)

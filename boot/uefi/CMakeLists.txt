@@ -22,34 +22,12 @@ target_link_options(${UEFI_TARGET} PRIVATE
 )
 
 # ----------------------------------------------------------------
-# Architecture-specific executable setup
+# Shared variables
 # ----------------------------------------------------------------
-set(UEFI_APPLICATION_TARGET uefi_application)
 set(UEFI_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+set(UEFI_OUTPUT_FILE ${UEFI_OUTPUT_DIRECTORY}/milli.efi)
 
+# ----------------------------------------------------------------
+# Architecture-specific executable setup (+ converts ELF to EFI)
+# ----------------------------------------------------------------
 add_subdirectory(arch/${ARCHITECTURE})
-
-# ----------------------------------------------------------------
-# Find ESP image tools
-# ----------------------------------------------------------------
-find_program(MKFS_FAT NAMES mkfs.fat mkfs.vfat)
-find_program(MMD NAMES mmd)
-find_program(MCOPY NAMES mcopy)
-find_program(PARTED NAMES parted)
-find_program(DD_TOOL NAMES dd REQUIRED)
-
-# ----------------------------------------------------------------
-# Export variables
-# ----------------------------------------------------------------
-set(UEFI_EFI ${CMAKE_CURRENT_BINARY_DIR}/milli.efi)
-
-# ----------------------------------------------------------------
-# Convert ELF to EFI
-# ----------------------------------------------------------------
-add_custom_command(
-    OUTPUT ${UEFI_EFI}
-    COMMAND ${UEFI_OBJCOPY} -O pei-x86-64 --subsystem 10
-            $<TARGET_FILE:${UEFI_TARGET}> ${UEFI_EFI}
-    DEPENDS ${UEFI_TARGET}
-    VERBATIM
-)

@@ -44,13 +44,16 @@ set(BIOS_STAGE2_BIN ${CMAKE_CURRENT_BINARY_DIR}/stage2.bin)
 # ----------------------------------------------------------------
 add_custom_command(
     OUTPUT ${BIOS_STAGE1_BIN}
-    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:bootloader_bios_stage1> ${BIOS_STAGE1_BIN}
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:bootloader_bios_stage1_elf> ${BIOS_STAGE1_BIN}
     DEPENDS bootloader_bios_stage1_elf
     VERBATIM
 )
+add_custom_target(bootloader_bios_stage1_bin ALL DEPENDS ${BIOS_STAGE1_BIN})
+
 add_custom_command(
     OUTPUT ${BIOS_STAGE2_BIN}
-    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:bootloader_bios_stage2> ${BIOS_STAGE2_BIN}
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:bootloader_bios_stage2_elf> ${BIOS_STAGE2_BIN}
     DEPENDS bootloader_bios_stage2_elf
     VERBATIM
 )
+add_custom_target(bootloader_bios_stage2_bin ALL DEPENDS ${BIOS_STAGE2_BIN})

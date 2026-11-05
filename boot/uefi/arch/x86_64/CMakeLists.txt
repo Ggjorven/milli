@@ -32,5 +32,6 @@ add_custom_command(
     DEPENDS ${UEFI_TARGET}
     VERBATIM
 )
+add_custom_target(bootloader_uefi_efi ALL DEPENDS ${UEFI_OUTPUT_FILE})
 
 set(UEFI_OUTPUT_FILE ${UEFI_OUTPUT_FILE} PARENT_SCOPE)

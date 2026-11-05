@@ -36,8 +36,10 @@ target_link_options(bootloader_bios_stage2_elf PRIVATE
 # ----------------------------------------------------------------
 # Export variables
 # ----------------------------------------------------------------
-set(BIOS_STAGE1_BIN ${CMAKE_CURRENT_BINARY_DIR}/stage1.bin PARENT_SCOPE)
-set(BIOS_STAGE2_BIN ${CMAKE_CURRENT_BINARY_DIR}/stage2.bin PARENT_SCOPE)
+set(BIOS_STAGE1_BIN "${CMAKE_CURRENT_BINARY_DIR}/stage1.bin")
+set(BIOS_STAGE2_BIN "${CMAKE_CURRENT_BINARY_DIR}/stage2.bin")
+set(BIOS_STAGE1_BIN "${BIOS_STAGE1_BIN}" PARENT_SCOPE)
+set(BIOS_STAGE2_BIN "${BIOS_STAGE2_BIN}" PARENT_SCOPE)
 
 # ----------------------------------------------------------------
 # Convert ELF files to BIN files (strips ELF metadata)

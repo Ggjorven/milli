@@ -25,7 +25,8 @@ target_link_options(${UEFI_TARGET} PRIVATE
 # Shared variables
 # ----------------------------------------------------------------
 set(UEFI_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-set(UEFI_EFI_FILE ${UEFI_OUTPUT_DIRECTORY}/milli.efi PARENT_SCOPE)
+set(UEFI_EFI_FILE "${UEFI_OUTPUT_DIRECTORY}/milli.efi")
+set(UEFI_EFI_FILE "${UEFI_EFI_FILE}" PARENT_SCOPE)
 
 # ----------------------------------------------------------------
 # Architecture-specific executable setup (+ converts ELF to EFI)

@@ -69,57 +69,121 @@ add_subdirectory(kernel)
 find_program(QEMU qemu-system-x86_64 DOC "Path to the QEMU x86_64 emulator")
 
 if(NOT QEMU)
-    message(WARNING "run and run-debug targets are not available because qemu cannot be found on your system."
+    message(WARNING "run and run-debug targets are not available because qemu cannot be found on your system.")
 endif()
 
-# Cross-platform OVMF UEFI firmware auto-discovery
-set(OVMF "" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)")
-if(NOT OVMF)
-    if(EXISTS "/usr/share/ovmf/OVMF.fd")
-        set(OVMF "/usr/share/ovmf/OVMF.fd")                         # Ubuntu/Debian
-    elseif(EXISTS "/usr/share/edk2/ovmf/OVMF_CODE.fd")
-        set(OVMF "/usr/share/edk2/ovmf/OVMF_CODE.fd")               # Fedora
-    elseif(EXISTS "/usr/share/edk2/x64/OVMF_CODE.fd")
-        set(OVMF "/usr/share/edk2/x64/OVMF_CODE.fd")                # Arch
-    elseif(EXISTS "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")
-        set(OVMF "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")    # MacOS Homebrew
-    else()
-        set(OVMF "OVMF.fd" CACHE FILEPATH "Path to UEFI firmware image")
-    endif()
-endif()
+find_program(DD dd REQUIRED)
+find_program(PARTED parted REQUIRED)
+find_program(MKFS_FAT mkfs.fat REQUIRED)
+find_program(MCOPY mcopy REQUIRED)
+find_program(MMD mmd REQUIRED)
 
 # ----------------------------------------------------------------
-# Combine bootloader, initrd & kernel
+# Combine bootloader, initrd & kernel into image
+# FUTURE TODO: Add initrd cpio
 # ----------------------------------------------------------------
+set(MILLI_IMAGE_SIZE_MIB 64 CACHE STRING "Size of generated disk images in MiB")
+set(MILLI_PARTITION_START_SECTOR 2048)
+
+math(EXPR MILLI_PARTITION_OFFSET_BYTES "${MILLI_PARTITION_START_SECTOR} * 512") # Each sector is 512 bytes
+
 if(BOOTLOADER STREQUAL "bios")
+    set(MILLI_BIOS_IMAGE "${CMAKE_BINARY_DIR}/milli-bios.img")
 
+    add_custom_command(
+        OUTPUT "${MILLI_BIOS_IMAGE}"
+        COMMAND ${DD} if=/dev/zero of=${MILLI_BIOS_IMAGE} bs=1048576 count=${MILLI_IMAGE_SIZE_MIB}
+        COMMAND ${PARTED} --script ${MILLI_BIOS_IMAGE}
+            mklabel msdos
+            mkpart primary fat32 1MiB 100%
+            set 1 boot on
+        COMMAND ${MKFS_FAT} --offset=${MILLI_PARTITION_START_SECTOR} -F 32 ${MILLI_BIOS_IMAGE}
+        COMMAND ${MMD} -i ${MILLI_BIOS_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES} ::/BOOT
+        COMMAND ${MCOPY} -i ${MILLI_BIOS_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES}
+            $<TARGET_FILE:kernel_elf> ::/BOOT/KERNEL.ELF
+        # COMMAND ${MCOPY} -i ${MILLI_BIOS_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES}
+        #     ${INITRD_CPIO} ::/BOOT/INITRD.CPI
+        COMMAND ${DD} if=${BIOS_STAGE2_BIN} of=${MILLI_BIOS_IMAGE} bs=512 seek=1 conv=notrunc
+        COMMAND ${DD} if=${BIOS_STAGE1_BIN} of=${MILLI_BIOS_IMAGE} bs=446 count=1 conv=notrunc
+        DEPENDS
+            bootloader_bios_stage1_bin
+            bootloader_bios_stage2_bin
+            kernel_elf
+            # ${INITRD_CPIO}
+        VERBATIM
+    )
+
+    add_custom_target(bios_image ALL DEPENDS "${MILLI_BIOS_IMAGE}")
 elseif(BOOTLOADER STREQUAL "uefi")
+    set(MILLI_UEFI_IMAGE "${CMAKE_BINARY_DIR}/milli-uefi.img")
 
+    add_custom_command(
+        OUTPUT "${MILLI_UEFI_IMAGE}"
+        COMMAND ${DD} if=/dev/zero of=${MILLI_UEFI_IMAGE} bs=1048576 count=${MILLI_IMAGE_SIZE_MIB}
+        COMMAND ${PARTED} --script ${MILLI_UEFI_IMAGE}
+            mklabel gpt
+            mkpart ESP fat32 1MiB 100%
+            set 1 esp on
+        COMMAND ${MKFS_FAT} --offset=${MILLI_PARTITION_START_SECTOR} -F 32 ${MILLI_UEFI_IMAGE}
+        COMMAND ${MMD} -i ${MILLI_UEFI_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES} ::/EFI
+        COMMAND ${MMD} -i ${MILLI_UEFI_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES} ::/EFI/BOOT
+        COMMAND ${MMD} -i ${MILLI_UEFI_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES} ::/BOOT
+        COMMAND ${MCOPY} -i ${MILLI_UEFI_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES}
+            ${UEFI_EFI_FILE} ::/EFI/BOOT/BOOTX64.EFI
+        COMMAND ${MCOPY} -i ${MILLI_UEFI_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES}
+            $<TARGET_FILE:kernel_elf> ::/BOOT/KERNEL.ELF
+        # COMMAND ${MCOPY} -i ${MILLI_UEFI_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES}
+        #     ${INITRD_CPIO} ::/BOOT/INITRD.CPI
+        DEPENDS
+            bootloader_uefi_efi
+            kernel_elf
+            # ${INITRD_CPIO}
+        VERBATIM
+    )
+
+    add_custom_target(uefi_image ALL DEPENDS "${MILLI_UEFI_IMAGE}")
 endif()
 
 # ----------------------------------------------------------------
-# Create run and run-debug targets (TODO)
+# Create run and run-debug targets
 # ----------------------------------------------------------------
-# if(BOOTLOADER STREQUAL "bios" AND QEMU)
-#     set(QEMU_COMMON_ARGS -M q35 -m 512M -serial stdio -no-reboot -no-shutdown)
-#
-#     add_custom_target(run
-#         COMMAND ${QEMU} ${QEMU_COMMON_ARGS} -drive format=raw,file=${MILLI_BIOS_IMAGE}
-#         DEPENDS bios_image
-#         USES_TERMINAL)
-#     add_custom_target(debug
-#         COMMAND ${QEMU} ${QEMU_COMMON_ARGS} -drive format=raw,file=${MILLI_BIOS_IMAGE} -s -S
-#         DEPENDS bios_image
-#         USES_TERMINAL)
-# elseif(BOOTLOADER STREQUAL "uefi" AND QEMU)
-#     set(QEMU_COMMON_ARGS -M q35 -m 512M -serial stdio -no-reboot -no-shutdown)
-#
-#     add_custom_target(run
-#         COMMAND ${QEMU} ${QEMU_COMMON_ARGS} -bios ${OVMF} -drive format=raw,file=${MILLI_UEFI_ESP_IMAGE}
-#         DEPENDS uefi_image
-#         USES_TERMINAL)
-#     add_custom_target(debug
-#         COMMAND ${QEMU} ${QEMU_COMMON_ARGS} -bios ${OVMF} -drive format=raw,file=${MILLI_UEFI_ESP_IMAGE} -s -S
-#         DEPENDS uefi_image
-#         USES_TERMINAL)
-# endif()
+if(QEMU)
+    set(QEMU_COMMON_ARGS -M q35 -m 512M -serial stdio -no-reboot -no-shutdown)
+
+    if(BOOTLOADER STREQUAL "bios")
+        set(MILLI_IMAGE "${MILLI_BIOS_IMAGE}")
+        set(MILLI_IMAGE_TARGET bios_image)
+        set(MILLI_QEMU_BOOT_ARGS -drive format=raw,file=${MILLI_IMAGE})
+    elseif(BOOTLOADER STREQUAL "uefi")
+        # Cross-platform OVMF UEFI firmware auto-discovery
+        set(OVMF "" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)")
+        if(NOT OVMF)
+            if(EXISTS "/usr/share/ovmf/OVMF.fd")
+                set(OVMF "/usr/share/ovmf/OVMF.fd")                         # Ubuntu/Debian
+            elseif(EXISTS "/usr/share/edk2/ovmf/OVMF_CODE.fd")
+                set(OVMF "/usr/share/edk2/ovmf/OVMF_CODE.fd")               # Fedora
+            elseif(EXISTS "/usr/share/edk2/x64/OVMF_CODE.fd")
+                set(OVMF "/usr/share/edk2/x64/OVMF_CODE.fd")                # Arch
+            elseif(EXISTS "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")
+                set(OVMF "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")    # MacOS Homebrew
+            else()
+                set(OVMF "OVMF.fd" CACHE FILEPATH "Path to UEFI firmware image")
+            endif()
+        endif()
+
+        set(MILLI_IMAGE "${MILLI_UEFI_IMAGE}")
+        set(MILLI_IMAGE_TARGET uefi_image)
+        set(MILLI_QEMU_BOOT_ARGS -bios ${OVMF} -drive format=raw,file=${MILLI_IMAGE})
+    endif()
+
+    add_custom_target(run
+        COMMAND ${QEMU} ${QEMU_COMMON_ARGS} ${MILLI_QEMU_BOOT_ARGS}
+        DEPENDS ${MILLI_IMAGE_TARGET}
+        USES_TERMINAL
+    )
+    add_custom_target(run-debug
+        COMMAND ${QEMU} ${QEMU_COMMON_ARGS} ${MILLI_QEMU_BOOT_ARGS} -s -S
+        DEPENDS ${MILLI_IMAGE_TARGET}
+        USES_TERMINAL
+    )
+endif()

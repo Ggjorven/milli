@@ -42,6 +42,8 @@ Follow the instructions for your platform set in [DEPENDENCIES.md](./doc/build/D
 - [Test instructions](./doc/build/TESTING.md)
 - [Run instructions](./doc/build/RUNNING.md)
 
+If you wish to get more insight into how the build proces builds the final `.img` file you can checkout [this architecture document](./doc/architecture/BUILD-ORDER.md).
+
 ## Notes
 
 While researching for this project I took notes you can find under [`doc/research/`](./doc/research/). This includes:
@@ -55,6 +57,7 @@ This project is licensed under the **MIT LICENSE**. See [LICENSE](./LICENSE.txt)
 ## Contributing
 
 Contributions are highly appreciated, please follow the contributing guidelines stated in [CONTRIBUTING.md](./CONTRIBUTING.md) to make a quality contribution.
+To get more insight into the file structure checkout [this architecture document](./doc/architecture/DIRECTORY-STRUCTURE.md).
 
 ## Acknowledgements
 

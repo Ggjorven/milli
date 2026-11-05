@@ -1,4 +1,11 @@
 # ----------------------------------------------------------------
+# Variables
+# ----------------------------------------------------------------
+if(NOT DEFINED ARCHITECTURE)
+	set(ARCHITECTURE x86_64 CACHE STRING "Target architecture")
+endif()
+
+# ----------------------------------------------------------------
 # Checks
 # ----------------------------------------------------------------
 if(NOT ARCHITECTURE STREQUAL "x86_64")
@@ -10,10 +17,6 @@ endif()
 # ----------------------------------------------------------------
 # Bare metal: no OS, no default libs/startfiles, compile x86_64 for architecture
 set(CMAKE_SYSTEM_NAME Generic)
-if(NOT DEFINED ARCHITECTURE)
-    set(ARCHITECTURE x86_64 CACHE STRING "Target architecture")
-endif()
-
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
 
 # Look for cross compiler (x86_64-elf-gcc), fall back to the host gcc.

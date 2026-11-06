@@ -23,6 +23,8 @@ set(ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
 set(BOOTLOADER "bios" CACHE STRING "Boot path to build and run: bios or uefi")
 set_property(CACHE BOOTLOADER PROPERTY STRINGS bios uefi)
 
+set(RUN_HEADLESS OFF CACHE BOOL "Run qemu run and run-debug fully headless")
+
 # ----------------------------------------------------------------
 # Checks
 # ----------------------------------------------------------------
@@ -149,13 +151,16 @@ endif()
 # ----------------------------------------------------------------
 if(QEMU)
     set(QEMU_COMMON_ARGS -M q35 -m 512M -serial stdio -no-reboot -no-shutdown)
+    if(RUN_HEADLESS)
+        list(APPEND QEMU_COMMON_ARGS -display none)
+    endif()
 
     if(BOOTLOADER STREQUAL "bios")
         set(MILLI_IMAGE "${MILLI_BIOS_IMAGE}")
         set(MILLI_IMAGE_TARGET bios_image)
         set(MILLI_QEMU_BOOT_ARGS -drive format=raw,file=${MILLI_IMAGE})
     elseif(BOOTLOADER STREQUAL "uefi")
-        # Cross-platform OVMF UEFI firmware auto-discovery
+        # Cross-platform OVMF UEFI firmware auto-discovery # TODO: Maybe cross-architecture.
         set(OVMF "" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)")
         if(NOT OVMF)
             if(EXISTS "/usr/share/ovmf/OVMF.fd")
@@ -167,6 +172,7 @@ if(QEMU)
             elseif(EXISTS "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")
                 set(OVMF "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")    # MacOS Homebrew
             else()
+                # TODO: Maybe error
                 set(OVMF "OVMF.fd" CACHE FILEPATH "Path to UEFI firmware image")
             endif()
         endif()

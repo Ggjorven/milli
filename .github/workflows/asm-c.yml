@@ -63,7 +63,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/opt/cross-compilers
-          key: cross-compiler-x86_64-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
+          key: cross-compiler-x86_64-${{ matrix.os }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
 
       - name: Build cross-compiler
         if: steps.cross-compiler-cache.outputs.cache-hit != 'true'
@@ -121,7 +121,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/opt/cross-compilers
-          key: cross-compiler-x86_64-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
+          key: cross-compiler-x86_64-${{ matrix.os }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
 
       - name: Add cross-compiler to PATH
         run: echo "$HOME/opt/cross/bin" >> "$GITHUB_PATH"

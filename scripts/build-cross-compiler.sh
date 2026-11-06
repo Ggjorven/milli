@@ -27,11 +27,11 @@ The same values may be supplied through ARCH, INSTALL_LOCATION, and SOURCE_DIR.
 Arguments take precedence over environment variables.
 
 Examples:
-  ARCH=x86_64 INSTALL_LOCATION=/opt/cross SOURCE_DIR=$HOME/src/cross \
+  ARCH=x86_64 INSTALL_LOCATION=/opt/cross-compilers SOURCE_DIR=$HOME/src/cross-compilers \
       ./scripts/build-cross-compiler.sh
 
   ./scripts/build-cross-compiler.sh --arch x86_64 \
-      --install-location "$HOME/opt/cross" --source-dir "$HOME/src/cross"
+      --install-location "$HOME/opt/cross-compilers" --source-dir "$HOME/src/cross-compilers"
 EOF
 }
 

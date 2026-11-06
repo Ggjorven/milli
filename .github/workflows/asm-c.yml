@@ -48,7 +48,7 @@ jobs:
             configure-preset: x86_64-release
             build-preset: x86_64-release
             bootloader: bios
-            booloader-name: BIOS
+            bootloader-name: BIOS
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7

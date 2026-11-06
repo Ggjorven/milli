@@ -60,7 +60,7 @@ jobs:
 
       - name: Restore cross-compiler cache
         id: cross-compiler-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/opt/cross-compilers
           key: cross-compiler-x86_64-${{ matrix.os }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
@@ -118,7 +118,7 @@ jobs:
           sudo apt-get install cmake qemu-system-x86 -y
 
       - name: Restore cross-compiler cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/opt/cross-compilers
           key: cross-compiler-x86_64-${{ matrix.os }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}

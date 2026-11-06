@@ -1,18 +1,4 @@
 # ----------------------------------------------------------------
-# Variables
-# ----------------------------------------------------------------
-if(NOT DEFINED ARCHITECTURE)
-	set(ARCHITECTURE x86_64 CACHE STRING "Target architecture")
-endif()
-
-# ----------------------------------------------------------------
-# Checks
-# ----------------------------------------------------------------
-if(NOT ARCHITECTURE STREQUAL "x86_64")
-    message(FATAL_ERROR "This toolchain only supports ARCHITECTURE=x86_64.")
-endif()
-
-# ----------------------------------------------------------------
 # Set defaults
 # ----------------------------------------------------------------
 # Bare metal: no OS, no default libs/startfiles, compile x86_64 for architecture

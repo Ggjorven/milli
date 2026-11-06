@@ -17,8 +17,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ----------------------------------------------------------------
 # Options
 # ----------------------------------------------------------------
-set(ARCHITECTURE "x86_64" CACHE STRING "Target architecture")
-set_property(CACHE ARCHITECTURE PROPERTY STRINGS x86_64)
+# The selected toolchain declares the target processor.
+set(ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
 
 set(BOOTLOADER "bios" CACHE STRING "Boot path to build and run: bios or uefi")
 set_property(CACHE BOOTLOADER PROPERTY STRINGS bios uefi)

@@ -1,4 +1,4 @@
-name: ASM / C
+name: ASM & C
 
 on:
   push:
@@ -29,3 +29,67 @@ jobs:
       with:
         category: "/language:actions"
 
+  build:
+    name: Build ${{ matrix.name }} for target x86_64 on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: debug
+            os: ubuntu-latest
+            configure-preset: x86_64-debug
+            build-preset: x86_64-debug
+          - name: release
+            os: ubuntu-latest
+            configure-preset: x86_64-release
+            build-preset: x86_64-release
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install cmake make build-essential bison flex libgmp3-dev libisl-dev libmpc-dev libmpfr-dev texinfo ovmf dosfstools mtools parted -y
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+
+      # TODO: Install cross compiler
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.configure-preset }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.build-preset }} --parallel
+
+  # qemu-smoke-test:
+  #   name: QEMU BIOS smoke test
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Install QEMU and image dependencies
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install --yes cmake gcc qemu-system-x86 dosfstools mtools parted
+  #
+  #     - name: Configure headless build
+  #       run: cmake --preset x86_64-debug -DRUN_HEADLESS=ON
+  #
+  #     - name: Build and boot in QEMU
+  #       shell: bash
+  #       run: |
+  #         set +e
+  #         timeout 15s cmake --build --preset x86_64-debug --target run
+  #         status=$?
+  #         set -e
+  #
+  #         # The kernel deliberately runs forever. A timeout proves QEMU stayed
+  #         # alive long enough to execute the image, whereas another exit status
+  #         # indicates a build or emulator failure.
+  #         if [ "$status" -ne 124 ]; then
+  #           exit "$status"
+  #         fi

@@ -30,7 +30,7 @@ jobs:
         category: "/language:actions"
 
   build:
-    name: Build ${{ matrix.name }} for target x86_64 with ${{ matrix.bootloader }} bootloader on ${{ matrix.os }}
+    name: Build ${{ matrix.name }} for target x86_64 with ${{ matrix.bootloader-name }} bootloader on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -42,15 +42,16 @@ jobs:
             os: ubuntu-latest
             configure-preset: x86_64-debug
             build-preset: x86_64-debug
-            bootloader: BIOS
+            bootloader: bios
           - name: release
             os: ubuntu-latest
             configure-preset: x86_64-release
             build-preset: x86_64-release
-            bootloader: BIOS
+            bootloader: bios
+            booloader-name: BIOS
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install build dependencies
         run: |
@@ -60,7 +61,7 @@ jobs:
 
       - name: Restore cross-compiler cache
         id: cross-compiler-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/opt/cross-compilers
           key: cross-compiler-x86_64-${{ matrix.os }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
@@ -93,7 +94,7 @@ jobs:
           compression-level: 0
 
   qemu-smoke-test:
-    name: QEMU smoke test ${{ matrix.name }} for target x86_64 using ${{ matrix.bootloader }}
+    name: QEMU smoke test ${{ matrix.name }} for target x86_64 using ${{ matrix.bootloader-name }}
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -107,10 +108,11 @@ jobs:
             bootloader: BIOS
           - name: release
             build-preset: x86_64-release
-            bootloader: BIOS
+            bootloader: bios
+            bootloader-name: BIOS
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install CMake and QEMU
         run: |
@@ -118,7 +120,7 @@ jobs:
           sudo apt-get install cmake qemu-system-x86 -y
 
       - name: Restore cross-compiler cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/opt/cross-compilers
           key: cross-compiler-x86_64-${{ matrix.os }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}

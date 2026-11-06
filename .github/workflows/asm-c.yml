@@ -9,7 +9,7 @@ on:
 jobs:
   lint-codeql:
     name: Lint (CodeQL)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       actions: read
       contents: read
@@ -39,12 +39,13 @@ jobs:
       matrix:
         include:
           - name: debug
-            os: ubuntu-latest
+            os: ubuntu-24.04
             configure-preset: x86_64-debug
             build-preset: x86_64-debug
             bootloader: bios
+            bootloader-name: BIOS
           - name: release
-            os: ubuntu-latest
+            os: ubuntu-24.04
             configure-preset: x86_64-release
             build-preset: x86_64-release
             bootloader: bios
@@ -57,7 +58,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install cmake make build-essential bison flex libgmp3-dev libisl-dev libmpc-dev libmpfr-dev texinfo curl ovmf dosfstools mtools parted qemu-system-x86 -y
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-24.04' }}
 
       - name: Restore cross-compiler cache
         id: cross-compiler-cache
@@ -96,7 +97,7 @@ jobs:
   qemu-smoke-test:
     name: QEMU smoke test ${{ matrix.name }} for target x86_64 using ${{ matrix.bootloader-name }}
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     strategy:
@@ -123,10 +124,10 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/opt/cross-compilers
-          key: cross-compiler-x86_64-${{ matrix.os }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
+          key: cross-compiler-x86_64-ubuntu-24.04-${{ hashFiles('scripts/build-cross-compiler.sh') }}
 
       - name: Add cross-compiler to PATH
-        run: echo "$HOME/opt/cross/bin" >> "$GITHUB_PATH"
+        run: echo "$HOME/opt/cross-compilers/bin" >> "$GITHUB_PATH"
 
       - name: Download configured build tree
         uses: actions/download-artifact@v8

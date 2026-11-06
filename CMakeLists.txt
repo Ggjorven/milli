@@ -68,7 +68,7 @@ add_subdirectory(kernel)
 # ----------------------------------------------------------------
 # Common tools
 # ----------------------------------------------------------------
-find_program(QEMU qemu-system-x86_64 DOC "Path to the QEMU x86_64 emulator")
+find_program(QEMU qemu-system-${ARCHITECTURE} DOC "Path to the QEMU ${ARCHITECTURE} emulator")
 
 if(NOT QEMU)
     message(WARNING "run and run-debug targets are not available because qemu cannot be found on your system.")
@@ -147,39 +147,44 @@ elseif(BOOTLOADER STREQUAL "uefi")
 endif()
 
 # ----------------------------------------------------------------
-# Create run and run-debug targets
+# Create run and run-debug targets (arch specific)
 # ----------------------------------------------------------------
 if(QEMU)
-    set(QEMU_COMMON_ARGS -M q35 -m 512M -serial stdio -no-reboot -no-shutdown)
-    if(RUN_HEADLESS)
-        list(APPEND QEMU_COMMON_ARGS -display none)
-    endif()
-
-    if(BOOTLOADER STREQUAL "bios")
-        set(MILLI_IMAGE "${MILLI_BIOS_IMAGE}")
-        set(MILLI_IMAGE_TARGET bios_image)
-        set(MILLI_QEMU_BOOT_ARGS -drive format=raw,file=${MILLI_IMAGE})
-    elseif(BOOTLOADER STREQUAL "uefi")
-        # Cross-platform OVMF UEFI firmware auto-discovery # TODO: Maybe cross-architecture.
-        set(OVMF "" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)")
-        if(NOT OVMF)
-            if(EXISTS "/usr/share/ovmf/OVMF.fd")
-                set(OVMF "/usr/share/ovmf/OVMF.fd")                         # Ubuntu/Debian
-            elseif(EXISTS "/usr/share/edk2/ovmf/OVMF_CODE.fd")
-                set(OVMF "/usr/share/edk2/ovmf/OVMF_CODE.fd")               # Fedora
-            elseif(EXISTS "/usr/share/edk2/x64/OVMF_CODE.fd")
-                set(OVMF "/usr/share/edk2/x64/OVMF_CODE.fd")                # Arch
-            elseif(EXISTS "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")
-                set(OVMF "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")    # MacOS Homebrew
-            else()
-                # TODO: Maybe error
-                set(OVMF "OVMF.fd" CACHE FILEPATH "Path to UEFI firmware image")
-            endif()
+    if(ARCHITECTURE STREQUAL "x86_64")
+        set(QEMU_COMMON_ARGS -M q35 -m 512M -serial stdio -no-reboot -no-shutdown)
+        if(RUN_HEADLESS)
+            list(APPEND QEMU_COMMON_ARGS -display none)
         endif()
 
-        set(MILLI_IMAGE "${MILLI_UEFI_IMAGE}")
-        set(MILLI_IMAGE_TARGET uefi_image)
-        set(MILLI_QEMU_BOOT_ARGS -bios ${OVMF} -drive format=raw,file=${MILLI_IMAGE})
+        if(BOOTLOADER STREQUAL "bios")
+            set(MILLI_IMAGE "${MILLI_BIOS_IMAGE}")
+            set(MILLI_IMAGE_TARGET bios_image)
+            set(MILLI_QEMU_BOOT_ARGS -drive format=raw,file=${MILLI_IMAGE})
+        elseif(BOOTLOADER STREQUAL "uefi")
+            # OVMF is the x86_64 UEFI firmware used by qemu-system-x86_64.
+            set(OVMF "" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)")
+            if(NOT OVMF)
+                if(EXISTS "/usr/share/ovmf/OVMF.fd")
+                    set(OVMF "/usr/share/ovmf/OVMF.fd" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)" FORCE) # Ubuntu/Debian
+                elseif(EXISTS "/usr/share/edk2/ovmf/OVMF_CODE.fd")
+                    set(OVMF "/usr/share/edk2/ovmf/OVMF_CODE.fd" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)" FORCE) # Fedora
+                elseif(EXISTS "/usr/share/edk2/x64/OVMF_CODE.fd")
+                    set(OVMF "/usr/share/edk2/x64/OVMF_CODE.fd" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)" FORCE) # Arch
+                elseif(EXISTS "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")
+                    set(OVMF "/opt/homebrew/share/qemu/edk2-x86_64-code.fd" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)" FORCE) # macOS Homebrew
+                else()
+                    message(FATAL_ERROR
+                        "No x86_64 OVMF firmware was found. Install OVMF or configure with "
+                        "-DOVMF=/path/to/OVMF_CODE.fd.")
+                endif()
+            endif()
+
+            set(MILLI_IMAGE "${MILLI_UEFI_IMAGE}")
+            set(MILLI_IMAGE_TARGET uefi_image)
+            set(MILLI_QEMU_BOOT_ARGS -bios ${OVMF} -drive format=raw,file=${MILLI_IMAGE})
+        endif()
+    else()
+        message(FATAL_ERROR "No QEMU run configuration exists for ARCHITECTURE=${ARCHITECTURE}.")
     endif()
 
     add_custom_target(run

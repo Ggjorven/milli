@@ -30,7 +30,7 @@ jobs:
         category: "/language:actions"
 
   build:
-    name: Build ${{ matrix.name }} for target x86_64 on ${{ matrix.os }}
+    name: Build ${{ matrix.name }} for target x86_64 with ${{ matrix.bootloader }} bootloader on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -42,10 +42,12 @@ jobs:
             os: ubuntu-latest
             configure-preset: x86_64-debug
             build-preset: x86_64-debug
+            bootloader: BIOS
           - name: release
             os: ubuntu-latest
             configure-preset: x86_64-release
             build-preset: x86_64-release
+            bootloader: BIOS
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -53,43 +55,91 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install cmake make build-essential bison flex libgmp3-dev libisl-dev libmpc-dev libmpfr-dev texinfo ovmf dosfstools mtools parted -y
+          sudo apt-get install cmake make build-essential bison flex libgmp3-dev libisl-dev libmpc-dev libmpfr-dev texinfo curl ovmf dosfstools mtools parted qemu-system-x86 -y
         if: ${{ matrix.os == 'ubuntu-latest' }}
 
-      # TODO: Install cross compiler
+      - name: Restore cross-compiler cache
+        id: cross-compiler-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/opt/cross-compilers
+          key: cross-compiler-x86_64-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
 
-      - name: Configure
-        run: cmake --preset ${{ matrix.configure-preset }}
+      - name: Build cross-compiler
+        if: steps.cross-compiler-cache.outputs.cache-hit != 'true'
+        run: |
+          chmod +x scripts/build-cross-compiler.sh
+          ./scripts/build-cross-compiler.sh --arch x86_64 --install-location "$HOME/opt/cross-compilers" --source-dir "$HOME/src/cross-compilers"
+
+      - name: Add compiler to PATH
+        run: echo "$HOME/opt/cross-compilers/bin" >> "$GITHUB_PATH"
+
+      - name: Verify cross-compiler exists
+        run: x86_64-elf-gcc --version
+
+      - name: Configure CMake
+        run: cmake --preset ${{ matrix.configure-preset }} -DRUN_HEADLESS=ON -D${{ matrix.bootloader }}
 
       - name: Build
         run: cmake --build --preset ${{ matrix.build-preset }} --parallel
 
-  # qemu-smoke-test:
-  #   name: QEMU BIOS smoke test
-  #   runs-on: ubuntu-latest
-  #
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - name: Install QEMU and image dependencies
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install --yes cmake gcc qemu-system-x86 dosfstools mtools parted
-  #
-  #     - name: Configure headless build
-  #       run: cmake --preset x86_64-debug -DRUN_HEADLESS=ON
-  #
-  #     - name: Build and boot in QEMU
-  #       shell: bash
-  #       run: |
-  #         set +e
-  #         timeout 15s cmake --build --preset x86_64-debug --target run
-  #         status=$?
-  #         set -e
-  #
-  #         # The kernel deliberately runs forever. A timeout proves QEMU stayed
-  #         # alive long enough to execute the image, whereas another exit status
-  #         # indicates a build or emulator failure.
-  #         if [ "$status" -ne 124 ]; then
-  #           exit "$status"
-  #         fi
+      - name: Upload configured build tree
+        uses: actions/upload-artifact@v7
+        with:
+          name: milli-build-x86_64-${{ matrix.name }}
+          path: build/${{ matrix.configure-preset }}
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+  qemu-smoke-test:
+    name: QEMU smoke test ${{ matrix.name }} for target x86_64 using ${{ matrix.bootloader }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: debug
+            build-preset: x86_64-debug
+            bootloader: BIOS
+          - name: release
+            build-preset: x86_64-release
+            bootloader: BIOS
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install CMake and QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install cmake qemu-system-x86 -y
+
+      - name: Restore cross-compiler cache
+        uses: actions/cache@v4
+        with:
+          path: ~/opt/cross-compilers
+          key: cross-compiler-x86_64-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
+
+      - name: Add cross-compiler to PATH
+        run: echo "$HOME/opt/cross/bin" >> "$GITHUB_PATH"
+
+      - name: Download configured build tree
+        uses: actions/download-artifact@v8
+        with:
+          name: milli-build-x86_64-${{ matrix.name }}
+          path: build/${{ matrix.build-preset }}
+
+      - name: Boot test (15s)
+        shell: bash
+        run: |
+          set +e
+          timeout 15s cmake --build --preset ${{ matrix.build-preset }} --target run
+          status=$?
+          set -e
+
+          if [ "$status" -ne 124 ]; then
+            exit "$status"
+          fi

@@ -78,7 +78,7 @@ jobs:
         run: x86_64-elf-gcc --version
 
       - name: Configure CMake
-        run: cmake --preset ${{ matrix.configure-preset }} -DRUN_HEADLESS=ON -D${{ matrix.bootloader }}
+        run: cmake --preset ${{ matrix.configure-preset }} -DRUN_HEADLESS=ON -DBOOTLOADER=${{ matrix.bootloader }}
 
       - name: Build
         run: cmake --build --preset ${{ matrix.build-preset }} --parallel

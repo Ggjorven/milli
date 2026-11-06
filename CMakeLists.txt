@@ -171,11 +171,9 @@ if(QEMU)
                 elseif(EXISTS "/usr/share/edk2/x64/OVMF_CODE.fd")
                     set(OVMF "/usr/share/edk2/x64/OVMF_CODE.fd" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)" FORCE) # Arch
                 elseif(EXISTS "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")
-                    set(OVMF "/opt/homebrew/share/qemu/edk2-x86_64-code.fd" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)" FORCE) # macOS Homebrew
+                    set(OVMF "/opt/homebrew/share/qemu/edk2-x86_64-code.fd" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)" FORCE) # MacOS Homebrew
                 else()
-                    message(FATAL_ERROR
-                        "No x86_64 OVMF firmware was found. Install OVMF or configure with "
-                        "-DOVMF=/path/to/OVMF_CODE.fd.")
+                    message(FATAL_ERROR "No x86_64 OVMF firmware was found. Install OVMF or configure with -DOVMF=/path/to/OVMF_CODE.fd.")
                 endif()
             endif()
 

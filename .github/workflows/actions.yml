@@ -3,8 +3,12 @@ name: Actions
 on:
   push:
     branches: [ "main", "dev", "feature/**", "fix/**" ]
+    paths:
+      - ".github/workflows/**"
   pull_request:
     branches: [ "main", "dev" ]
+    paths:
+      - ".github/workflows/**"
 
 jobs:
   lint-codeql:

@@ -21,6 +21,14 @@ target_link_options(${UEFI_TARGET} PRIVATE
     -Wl,--build-id=none
 )
 
+set(UEFI_ELF_STAMP "${CMAKE_CURRENT_BINARY_DIR}/bootloader_uefi_elf.stamp")
+add_custom_command(TARGET ${UEFI_TARGET} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E touch "${UEFI_ELF_STAMP}"
+    BYPRODUCTS "${UEFI_ELF_STAMP}"
+    VERBATIM
+)
+set(UEFI_ELF_STAMP "${UEFI_ELF_STAMP}" PARENT_SCOPE)
+
 # ----------------------------------------------------------------
 # Shared variables
 # ----------------------------------------------------------------

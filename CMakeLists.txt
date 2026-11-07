@@ -92,8 +92,8 @@ math(EXPR MILLI_PARTITION_OFFSET_BYTES "${MILLI_PARTITION_START_SECTOR} * 512") 
 if(BOOTLOADER STREQUAL "bios")
     set(MILLI_BIOS_IMAGE "${CMAKE_BINARY_DIR}/milli-bios.img")
 
-    add_custom_target(bios_image ALL
-        BYPRODUCTS "${MILLI_BIOS_IMAGE}"
+    add_custom_command(
+        OUTPUT "${MILLI_BIOS_IMAGE}"
         COMMAND ${DD} if=/dev/zero of=${MILLI_BIOS_IMAGE} bs=1048576 count=${MILLI_IMAGE_SIZE_MIB}
         COMMAND ${SGDISK} --clear
             --new=1:${MILLI_PARTITION_START_SECTOR}:0
@@ -108,14 +108,20 @@ if(BOOTLOADER STREQUAL "bios")
         #     ${INITRD_CPIO} ::/BOOT/INITRD.CPI
         COMMAND ${DD} if=${BIOS_STAGE2_BIN} of=${MILLI_BIOS_IMAGE} bs=512 seek=1 conv=notrunc
         COMMAND ${DD} if=${BIOS_STAGE1_BIN} of=${MILLI_BIOS_IMAGE} bs=446 count=1 conv=notrunc
+        DEPENDS
+            "${BIOS_STAGE1_BIN}"
+            "${BIOS_STAGE2_BIN}"
+            "${KERNEL_ELF_STAMP}"
+            # INITRD
         VERBATIM
     )
+    add_custom_target(bios_image ALL DEPENDS "${MILLI_BIOS_IMAGE}")
     add_dependencies(bios_image bootloader_bios_stage1_bin bootloader_bios_stage2_bin kernel_elf) # NOTE: In the future initrd
 elseif(BOOTLOADER STREQUAL "uefi")
     set(MILLI_UEFI_IMAGE "${CMAKE_BINARY_DIR}/milli-uefi.img")
 
-    add_custom_target(uefi_image ALL
-        BYPRODUCTS "${MILLI_UEFI_IMAGE}"
+    add_custom_command(
+        OUTPUT "${MILLI_UEFI_IMAGE}"
         COMMAND ${DD} if=/dev/zero of=${MILLI_UEFI_IMAGE} bs=1048576 count=${MILLI_IMAGE_SIZE_MIB}
         COMMAND ${SGDISK} --clear
             --new=1:${MILLI_PARTITION_START_SECTOR}:0
@@ -132,8 +138,13 @@ elseif(BOOTLOADER STREQUAL "uefi")
             $<TARGET_FILE:kernel_elf> ::/BOOT/KERNEL.ELF
         # COMMAND ${MCOPY} -i ${MILLI_UEFI_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES}
         #     ${INITRD_CPIO} ::/BOOT/INITRD.CPI
+        DEPENDS
+            "${UEFI_EFI_FILE}"
+            "${KERNEL_ELF_STAMP}"
+            # INITRD
         VERBATIM
     )
+    add_custom_target(uefi_image ALL DEPENDS "${MILLI_UEFI_IMAGE}")
     add_dependencies(uefi_image bootloader_uefi_efi kernel_elf) # NOTE: In the future initrd
 endif()
 

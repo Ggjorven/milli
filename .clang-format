@@ -127,7 +127,7 @@ SpacesInParensOptions:
   Other: false
 SpacesInSquareBrackets: false
 
-ReflowComments: Always
+ReflowComments: true
 IncludeBlocks: Preserve
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
@@ -156,12 +156,6 @@ PenaltyBreakString: 1000
 PenaltyExcessCharacter: 1000000
 PenaltyIndentedWhitespace: 0
 PenaltyReturnTypeOnItsOwnLine: 60
-
----
-# ----------------------------------------------------------------
-# C
-# ----------------------------------------------------------------
-Language: C
 
 ---
 # ----------------------------------------------------------------

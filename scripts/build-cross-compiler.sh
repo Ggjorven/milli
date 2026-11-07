@@ -109,11 +109,14 @@ case "$OSTYPE" in
             "--with-mpfr=$(brew --prefix mpfr)"
             "--with-mpc=$(brew --prefix libmpc)"
         )
+        # Binutils' bundled zlib does not build against recent macOS SDKs.
+        BINUTILS_CONFIGURE_OPTIONS=(--with-system-zlib)
         ;;
     *)
         MAKE="${MAKE:-make}"
         JOBS="${JOBS:-$(nproc)}"
         GCC_DEPENDENCY_OPTIONS=()
+        BINUTILS_CONFIGURE_OPTIONS=()
         ;;
 esac
 
@@ -183,7 +186,7 @@ mkdir -p "$BINUTILS_BUILD"
 (
     cd "$BINUTILS_BUILD"
     "$BINUTILS_SOURCE/configure" --target="$TARGET" --prefix="$INSTALL_LOCATION" --with-sysroot \
-        --disable-nls --disable-werror
+        --disable-nls --disable-werror "${BINUTILS_CONFIGURE_OPTIONS[@]}"
 )
 
 log "building Binutils"

@@ -208,7 +208,7 @@ jobs:
 
   lint-clang:
     name: Lint (clang)
-    needs: toolchain
+    needs: toolchains
     runs-on: ubuntu-24.04
     permissions:
       contents: read

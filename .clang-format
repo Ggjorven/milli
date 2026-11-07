@@ -103,7 +103,6 @@ AllowAllArgumentsOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 BinPackArguments: true
 BinPackLongBracedList: true
-BinPackParameters: BinPack
 ExperimentalAutoDetectBinPacking: false
 
 BitFieldColonSpacing: Both

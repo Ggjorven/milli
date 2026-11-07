@@ -94,13 +94,13 @@ Install all the tools need for your wanted architecture.
 
 ```sh
 # Debian / Ubuntu
-sudo apt install qemu-system-x86 ovmf dosfstools mtools gdisk
+sudo apt install qemu-system-x86 ovmf dosfstools mtools gdisk mingw-w64
 
 # Fedora
-sudo dnf install qemu-system-x86 edk2-ovmf dosfstools mtools gdisk
+sudo dnf install qemu-system-x86 edk2-ovmf dosfstools mtools gdisk mingw64-binutils
 
 # Arch Linux
-sudo pacman -S qemu-desktop edk2-ovmf dosfstools mtools gptfdisk
+sudo pacman -S qemu-desktop edk2-ovmf dosfstools mtools gptfdisk mingw-w64-binutils
 ```
 
 ### MacOS
@@ -110,11 +110,11 @@ Install all the tools need for your wanted architecture with [Homebrew](https://
 #### x86_64 target
 
 ```sh
-brew install qemu dosfstools mtools gptfdisk
+brew install qemu dosfstools mtools gptfdisk mingw-w64
 ```
 
-Homebrew's QEMU package provides the UEFI firmware detected by the CMake configuration. The
-`gptfdisk` package provides `sgdisk`, which creates the disk's GPT partition table.
+Homebrew's QEMU package provides the UEFI firmware detected by the CMake configuration.
+The `gptfdisk` package provides `sgdisk`, which creates the disk's GPT partition table.
 
 ## Check the full installation
 

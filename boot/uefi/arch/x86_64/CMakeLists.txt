@@ -20,8 +20,8 @@ target_link_options(${UEFI_TARGET} PRIVATE
 # ----------------------------------------------------------------
 # Find objcopy for x86_64 which can emit PE
 # ----------------------------------------------------------------
-# CMAKE_OBJCOPY belongs to the ELF cross toolchain and usually cannot emit PE.
-find_program(UEFI_OBJCOPY NAMES x86_64-w64-mingw32-objcopy mingw-objcopy objcopy REQUIRED)
+# CMAKE_OBJCOPY belongs to the ELF cross toolchain and cannot emit PE/COFF.
+find_program(UEFI_OBJCOPY NAMES x86_64-w64-mingw32-objcopy mingw-objcopy REQUIRED)
 
 # ----------------------------------------------------------------
 # Convert the ELF executable to an x86_64 UEFI application

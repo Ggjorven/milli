@@ -45,8 +45,8 @@ jobs:
       with:
         category: "/language:actions"
 
-  toolchain:
-    name: Build cross-compiler on ${{ matrix.os }}
+  toolchains:
+    name: Build cross-compilers on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -86,19 +86,19 @@ jobs:
           path: ~/opt/cross-compilers
           key: cross-compiler-x86_64-${{ matrix.os }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
 
-      - name: Build cross-compiler
+      - name: Build cross-compiler for x86_64
         if: steps.cross-compiler-cache.outputs.cache-hit != 'true'
         run: |
           chmod +x scripts/build-cross-compiler.sh
           ./scripts/build-cross-compiler.sh --arch x86_64 --install-location "$HOME/opt/cross-compilers" --source-dir "$HOME/src/cross-compilers"
 
-      - name: Verify cross-compiler exists
+      - name: Verify cross-compilers exists
         run: |
           "$HOME/opt/cross-compilers/bin/x86_64-elf-gcc" --version
 
   build:
     name: Build ${{ matrix.name }} for target x86_64 with ${{ matrix.bootloader-name }} bootloader on ${{ matrix.os }}
-    needs: toolchain
+    needs: toolchains
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -165,7 +165,7 @@ jobs:
           sudo apt-get install --yes --no-install-recommends \
             cmake make build-essential bison flex \
             libgmp3-dev libisl-dev libmpc-dev libmpfr-dev texinfo curl \
-            dosfstools mtools gdisk qemu-system-x86
+            dosfstools mtools gdisk mingw-w64 qemu-system-x86
         if: ${{ matrix.os == 'ubuntu-24.04' }}
 
       - name: Set up Homebrew
@@ -176,7 +176,7 @@ jobs:
         timeout-minutes: 10
         run: |
           brew install cmake make bison flex gmp isl libmpc mpfr texinfo \
-            curl qemu dosfstools mtools gptfdisk
+            curl qemu dosfstools mtools gptfdisk mingw-w64
         if: ${{ matrix.os == 'macos-26' }}
 
       - name: Restore cross-compiler cache
@@ -231,7 +231,7 @@ jobs:
         sudo apt-get install --yes --no-install-recommends \
           cmake make build-essential \
           libgmp3-dev libisl-dev libmpc-dev libmpfr-dev \
-          dosfstools mtools gdisk \
+          dosfstools mtools gdisk mingw-w64 \
           clang-tidy clang-format
 
     - name: Configure BIOS lint database

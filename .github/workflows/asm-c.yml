@@ -43,8 +43,60 @@ jobs:
       with:
         category: "/language:actions"
 
+  toolchain:
+    name: Build cross-compiler on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+          - os: macos-26
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install cross-compiler dependencies on Linux
+        timeout-minutes: 10
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            make build-essential bison flex \
+            libgmp3-dev libisl-dev libmpc-dev libmpfr-dev texinfo curl
+        if: ${{ matrix.os == 'ubuntu-24.04' }}
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@2026.11.02.1
+        if: ${{ matrix.os == 'macos-26' }}
+
+      - name: Install cross-compiler dependencies on MacOS
+        timeout-minutes: 10
+        run: |
+          brew install make bison flex gmp isl libmpc mpfr texinfo curl
+        if: ${{ matrix.os == 'macos-26' }}
+
+      - name: Restore cross-compiler cache
+        id: cross-compiler-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/opt/cross-compilers
+          key: cross-compiler-x86_64-${{ matrix.os }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
+
+      - name: Build cross-compiler
+        if: steps.cross-compiler-cache.outputs.cache-hit != 'true'
+        run: |
+          chmod +x scripts/build-cross-compiler.sh
+          ./scripts/build-cross-compiler.sh --arch x86_64 --install-location "$HOME/opt/cross-compilers" --source-dir "$HOME/src/cross-compilers"
+
+      - name: Verify cross-compiler exists
+        run: |
+          "$HOME/opt/cross-compilers/bin/x86_64-elf-gcc" --version
+
   build:
     name: Build ${{ matrix.name }} for target x86_64 with ${{ matrix.bootloader-name }} bootloader on ${{ matrix.os }}
+    needs: toolchain
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
@@ -114,17 +166,10 @@ jobs:
         if: ${{ matrix.os == 'macos-26' }}
 
       - name: Restore cross-compiler cache
-        id: cross-compiler-cache
         uses: actions/cache@v6
         with:
           path: ~/opt/cross-compilers
           key: cross-compiler-x86_64-${{ matrix.os }}-${{ hashFiles('scripts/build-cross-compiler.sh') }}
-
-      - name: Build cross-compiler
-        if: steps.cross-compiler-cache.outputs.cache-hit != 'true'
-        run: |
-          chmod +x scripts/build-cross-compiler.sh
-          ./scripts/build-cross-compiler.sh --arch x86_64 --install-location "$HOME/opt/cross-compilers" --source-dir "$HOME/src/cross-compilers"
 
       - name: Add compiler to PATH
         run: echo "$HOME/opt/cross-compilers/bin" >> "$GITHUB_PATH"
@@ -149,7 +194,7 @@ jobs:
 
   lint-clang:
     name: Lint (clang)
-    needs: build
+    needs: toolchain
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -166,40 +211,40 @@ jobs:
     - name: Add cross-compiler to PATH
       run: echo "$HOME/opt/cross-compilers/bin" >> "$GITHUB_PATH"
 
-    - name: Download debug BIOS build metadata
-      uses: actions/download-artifact@v8
-      with:
-        name: milli-build-x86_64-ubuntu-24.04-debug-bios
-        path: artifacts/bios
+    - name: Install CMake and clang tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes --no-install-recommends \
+          cmake make build-essential \
+          libgmp3-dev libisl-dev libmpc-dev libmpfr-dev \
+          dosfstools mtools parted \
+          clang-tidy clang-format
 
-    - name: Download debug UEFI build metadata
-      uses: actions/download-artifact@v8
-      with:
-        name: milli-build-x86_64-ubuntu-24.04-debug-uefi
-        path: artifacts/uefi
-
-    - name: Install clang tools
-      run: sudo apt-get install --yes --no-install-recommends clang-tidy clang-format
+    - name: Configure BIOS lint database
+      run: cmake --preset x86_64-debug -DBOOTLOADER=bios
 
     - name: Run clang-tidy for BIOS
       id: tidy-bios-job
       run: |
         find boot/bios -type f -name '*.c' -print0 |
-          xargs -0 -r clang-tidy -p artifacts/bios
-      continue-on-error: true
-
-    - name: Run clang-tidy for UEFI
-      id: tidy-uefi-job
-      run: |
-        find boot/uefi -type f -name '*.c' -print0 |
-          xargs -0 -r clang-tidy -p artifacts/uefi
+          xargs -0 -r clang-tidy -p build/x86_64-debug
       continue-on-error: true
 
     - name: Run clang-tidy for kernel
       id: tidy-kernel-job
       run: |
         find kernel -type f -name '*.c' -print0 |
-          xargs -0 -r clang-tidy -p artifacts/bios
+          xargs -0 -r clang-tidy -p build/x86_64-debug
+      continue-on-error: true
+
+    - name: Configure UEFI lint database
+      run: cmake --preset x86_64-debug -DBOOTLOADER=uefi
+
+    - name: Run clang-tidy for UEFI
+      id: tidy-uefi-job
+      run: |
+        find boot/uefi -type f -name '*.c' -print0 |
+          xargs -0 -r clang-tidy -p build/x86_64-debug
       continue-on-error: true
 
     - name: Run clang-format

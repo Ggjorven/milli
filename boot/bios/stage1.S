@@ -1,9 +1,10 @@
 .code16
-.global stage1_start
+.global stage1_start	; Export symbol
 
 .section .text
-stage1_start:
-    cli
+
+stage1_start: 			; Must be first in the file
+	cli					; Clear interrupt flag
 1:
-    hlt
-    jmp 1b
+    hlt					; Halt
+    jmp 1b				; Jump to nearest 1 (backwards)

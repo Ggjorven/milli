@@ -4,7 +4,7 @@
 # Assembly executable (16-bit) (512 bytes)
 # ----------------------------------------------------------------
 add_executable(bootloader_bios_stage1_elf
-    stage1.S
+    stage1.S # Must be first
     realmode.S
 )
 target_compile_options(bootloader_bios_stage1_elf PRIVATE -m16 -m32)

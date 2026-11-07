@@ -96,7 +96,7 @@ jobs:
         run: |
           "$HOME/opt/cross-compilers/bin/x86_64-elf-gcc" --version
 
-  build:
+  build-x86_64:
     name: Build x86_64 ${{ matrix.configuration }} with ${{ matrix.bootloader }} bootloader on ${{ matrix.os }}
     needs: toolchains
     runs-on: ${{ matrix.os }}
@@ -230,9 +230,9 @@ jobs:
         steps.format-job.outcome == 'failure'
       run: exit 1
 
-  qemu-smoke-test:
+  qemu-smoke-test-x86_64:
     name: QEMU smoke test x86_64 ${{ matrix.configuration }} with ${{ matrix.bootloader }} bootloader on ${{ matrix.os }}
-    needs: toolchains
+    needs: build-x86_64
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read

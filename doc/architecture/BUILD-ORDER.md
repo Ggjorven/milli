@@ -53,13 +53,18 @@ protective MBR's boot-code area, while the FAT32 partition starts at sector 2048
 | Sector | Contents |
 | -- | -- |
 | `0` | Protective MBR: stage-1 code (446 bytes), GPT protective partition & 0x55AA signature |
-| `1-2047` | Stage-2 code |
+| `1` | Primary GPT header |
+| `2-33` | Primary GPT partition-entry array |
+| `34-2047` | Stage-2 code, followed by unused space |
 | `2048+` | FAT 32 partition: <br>├── /BOOT/KERNEL.ELF<br>└── /BOOT/INITRD.CPI |
 
-The MBR layout fixes the stage-1 bootstrap area at 446 bytes even though a sector is 512 bytes.
-The partition table contains four 16-byte entries (64 bytes), and the boot signature is 2 bytes
-(`0x55AA`). The protective entry preserves the GPT partition table, so the available code space is
-`512 - (4 * 16) - 2 = 446` bytes.
+The protected MBR layout fixes the stage-1 bootstrap area at 446 bytes even though a sector is 512 bytes.
+The MBR's partition table contains four 16-byte entries (64 bytes), and the boot signature is 2 bytes (`0x55AA`).
+The protective entry preserves the GPT partition table, so the available code space is `512 - (4 * 16) - 2 = 446` bytes.
+
+GPT metadata must remain at the beginning of the disk. The primary GPT header is stored at sector `1`,
+with `sgdisk`'s default 128 partition entries, its partition-entry array occupies sectors `2-33`.
+Therefore stage 2 starts at sector `34`, in the unallocated gap before the FAT32 partition.
 
 For the BIOS image, CMake currently does this order:
 
@@ -67,7 +72,7 @@ For the BIOS image, CMake currently does this order:
 2. Create the GPT partition table and its protective MBR.
 3. Format the partition at sector 2048 as FAT32.
 4. Copy KERNEL.ELF and INITRD.CPI into that FAT32 filesystem.
-5. Write stage 2 at sector 1.
+5. Write stage 2 at sector 34, after the primary GPT metadata.
 6. Write the first 446 bytes of stage 1 into sector 0.
 
 ### UEFI

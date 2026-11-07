@@ -85,6 +85,9 @@ find_program(MMD mmd REQUIRED)
 # FUTURE TODO: Add initrd cpio
 # ----------------------------------------------------------------
 set(MILLI_IMAGE_SIZE_MIB 64 CACHE STRING "Size of generated disk images in MiB")
+# GPT reserves sector 1 for its primary header and sectors 2-33 for its primary partition-entry array
+# So, stage 2 code must come after that.
+set(MILLI_BIOS_STAGE2_START_SECTOR 34)
 set(MILLI_PARTITION_START_SECTOR 2048)
 
 math(EXPR MILLI_PARTITION_OFFSET_BYTES "${MILLI_PARTITION_START_SECTOR} * 512") # Each sector is 512 bytes
@@ -106,7 +109,8 @@ if(BOOTLOADER STREQUAL "bios")
             $<TARGET_FILE:kernel_elf> ::/BOOT/KERNEL.ELF
         # COMMAND ${MCOPY} -i ${MILLI_BIOS_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES}
         #     ${INITRD_CPIO} ::/BOOT/INITRD.CPI
-        COMMAND ${DD} if=${BIOS_STAGE2_BIN} of=${MILLI_BIOS_IMAGE} bs=512 seek=1 conv=notrunc
+        COMMAND ${DD} if=${BIOS_STAGE2_BIN} of=${MILLI_BIOS_IMAGE}
+            bs=512 seek=${MILLI_BIOS_STAGE2_START_SECTOR} conv=notrunc
         COMMAND ${DD} if=${BIOS_STAGE1_BIN} of=${MILLI_BIOS_IMAGE} bs=446 count=1 conv=notrunc
         DEPENDS
             "${BIOS_STAGE1_BIN}"

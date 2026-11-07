@@ -108,6 +108,7 @@ case "$OSTYPE" in
             "--with-gmp=$(brew --prefix gmp)"
             "--with-mpfr=$(brew --prefix mpfr)"
             "--with-mpc=$(brew --prefix libmpc)"
+            "--with-system-zlib"
         )
         # Binutils' bundled zlib does not build against recent macOS SDKs.
         BINUTILS_CONFIGURE_OPTIONS=(--with-system-zlib)

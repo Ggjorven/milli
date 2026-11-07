@@ -58,8 +58,32 @@ jobs:
             build-preset: x86_64-debug
             bootloader: bios
             bootloader-name: BIOS
+          - name: debug
+            os: ubuntu-24.04
+            configure-preset: x86_64-debug
+            build-preset: x86_64-debug
+            bootloader: uefi
+            bootloader-name: UEFI
           - name: release
             os: ubuntu-24.04
+            configure-preset: x86_64-release
+            build-preset: x86_64-release
+            bootloader: bios
+            bootloader-name: BIOS
+          - name: release
+            os: ubuntu-24.04
+            configure-preset: x86_64-release
+            build-preset: x86_64-release
+            bootloader: uefi
+            bootloader-name: UEFI
+          - name: debug
+            os: macos-26
+            configure-preset: x86_64-debug
+            build-preset: x86_64-debug
+            bootloader: bios
+            bootloader-name: BIOS
+          - name: release
+            os: macos-26
             configure-preset: x86_64-release
             build-preset: x86_64-release
             bootloader: bios
@@ -68,7 +92,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Install build dependencies
+      - name: Install build dependencies linux
         timeout-minutes: 10
         run: |
           sudo apt-get update
@@ -77,6 +101,17 @@ jobs:
             libgmp3-dev libisl-dev libmpc-dev libmpfr-dev texinfo curl \
             dosfstools mtools parted qemu-system-x86
         if: ${{ matrix.os == 'ubuntu-24.04' }}
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@2026.11.02.1
+        if: ${{ matrix.os == 'macos-26' }}
+
+      - name: Install build dependencies mac
+        timeout-minutes: 10
+        run: |
+          brew install cmake make bison flex gmp isl libmpc mpfr texinfo \
+            curl qemu dosfstools mtools
+        if: ${{ matrix.os == 'macos-26' }}
 
       - name: Restore cross-compiler cache
         id: cross-compiler-cache

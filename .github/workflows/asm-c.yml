@@ -170,29 +170,51 @@ jobs:
       uses: actions/download-artifact@v8
       with:
         name: milli-build-x86_64-ubuntu-24.04-debug-bios
-        path: build/x86_64-debug
+        path: artifacts/bios
+
+    - name: Download debug UEFI build metadata
+      uses: actions/download-artifact@v8
+      with:
+        name: milli-build-x86_64-ubuntu-24.04-debug-uefi
+        path: artifacts/uefi
 
     - name: Install clang tools
       run: sudo apt-get install --yes --no-install-recommends clang-tidy clang-format
 
-    # NOTE: All code folders need to be manually put here
-    - name: Run clang-tidy
-      id: tidy-job
+    - name: Run clang-tidy for BIOS
+      id: tidy-bios-job
       run: |
-        find boot kernel -type f -name '*.c' -print0 |
-        xargs -0 -r clang-tidy -p build/x86_64-debug
+        find boot/bios -type f -name '*.c' -print0 |
+          xargs -0 -r clang-tidy -p artifacts/bios
       continue-on-error: true
 
-    # NOTE: All code folders need to be manually put here
+    - name: Run clang-tidy for UEFI
+      id: tidy-uefi-job
+      run: |
+        find boot/uefi -type f -name '*.c' -print0 |
+          xargs -0 -r clang-tidy -p artifacts/uefi
+      continue-on-error: true
+
+    - name: Run clang-tidy for kernel
+      id: tidy-kernel-job
+      run: |
+        find kernel -type f -name '*.c' -print0 |
+          xargs -0 -r clang-tidy -p artifacts/bios
+      continue-on-error: true
+
     - name: Run clang-format
       id: format-job
       run: |
         find boot kernel -type f \( -name '*.c' -o -name '*.h' \) -print0 |
-        xargs -0 -r clang-format --dry-run --Werror
+          xargs -0 -r clang-format --dry-run --Werror
       continue-on-error: true
 
     - name: Fail on lint error
-      if: steps.tidy-job.outcome == 'failure' || steps.format-job.outcome == 'failure'
+      if: >-
+        steps.tidy-bios-job.outcome == 'failure' ||
+        steps.tidy-uefi-job.outcome == 'failure' ||
+        steps.tidy-kernel-job.outcome == 'failure' ||
+        steps.format-job.outcome == 'failure'
       run: exit 1
 
   # TODO: Fix re-build

@@ -94,29 +94,27 @@ Install all the tools need for your wanted architecture.
 
 ```sh
 # Debian / Ubuntu
-sudo apt install qemu-system-x86 ovmf dosfstools mtools parted
+sudo apt install qemu-system-x86 ovmf dosfstools mtools gdisk
 
 # Fedora
-sudo dnf install qemu-system-x86 edk2-ovmf dosfstools mtools parted
+sudo dnf install qemu-system-x86 edk2-ovmf dosfstools mtools gdisk
 
 # Arch Linux
-sudo pacman -S qemu-desktop edk2-ovmf dosfstools mtools parted
+sudo pacman -S qemu-desktop edk2-ovmf dosfstools mtools gptfdisk
 ```
 
 ### MacOS
 
 Install all the tools need for your wanted architecture with [Homebrew](https://brew.sh/).
 
-> [!IMPORTANT]
-> The UEFI image target cannot be built on MacOS at this moment because `parted` cannot be installed, see: [#621579](https://superuser.com/questions/621579/install-gparted-on-a-mac-with-homebrew-or-macports).
-
 #### x86_64 target
 
 ```sh
-brew install qemu dosfstools mtools
+brew install qemu dosfstools mtools gptfdisk
 ```
 
-Homebrew's QEMU package provides the UEFI firmware detected by the CMake configuration.
+Homebrew's QEMU package provides the UEFI firmware detected by the CMake configuration. The
+`gptfdisk` package provides `sgdisk`, which creates the disk's GPT partition table.
 
 ## Check the full installation
 

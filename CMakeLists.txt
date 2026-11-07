@@ -75,7 +75,7 @@ if(NOT QEMU)
 endif()
 
 find_program(DD dd REQUIRED)
-find_program(PARTED parted REQUIRED)
+find_program(SGDISK sgdisk REQUIRED)
 find_program(MKFS_FAT mkfs.fat REQUIRED)
 find_program(MCOPY mcopy REQUIRED)
 find_program(MMD mmd REQUIRED)
@@ -92,13 +92,14 @@ math(EXPR MILLI_PARTITION_OFFSET_BYTES "${MILLI_PARTITION_START_SECTOR} * 512") 
 if(BOOTLOADER STREQUAL "bios")
     set(MILLI_BIOS_IMAGE "${CMAKE_BINARY_DIR}/milli-bios.img")
 
-    add_custom_command(
-        OUTPUT "${MILLI_BIOS_IMAGE}"
+    add_custom_target(bios_image ALL
+        BYPRODUCTS "${MILLI_BIOS_IMAGE}"
         COMMAND ${DD} if=/dev/zero of=${MILLI_BIOS_IMAGE} bs=1048576 count=${MILLI_IMAGE_SIZE_MIB}
-        COMMAND ${PARTED} --script ${MILLI_BIOS_IMAGE}
-            mklabel msdos
-            mkpart primary fat32 1MiB 100%
-            set 1 boot on
+        COMMAND ${SGDISK} --clear
+            --new=1:${MILLI_PARTITION_START_SECTOR}:0
+            --typecode=1:0700
+            --change-name=1:milli
+            ${MILLI_BIOS_IMAGE}
         COMMAND ${MKFS_FAT} --offset=${MILLI_PARTITION_START_SECTOR} -F 32 ${MILLI_BIOS_IMAGE}
         COMMAND ${MMD} -i ${MILLI_BIOS_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES} ::/BOOT
         COMMAND ${MCOPY} -i ${MILLI_BIOS_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES}
@@ -107,25 +108,20 @@ if(BOOTLOADER STREQUAL "bios")
         #     ${INITRD_CPIO} ::/BOOT/INITRD.CPI
         COMMAND ${DD} if=${BIOS_STAGE2_BIN} of=${MILLI_BIOS_IMAGE} bs=512 seek=1 conv=notrunc
         COMMAND ${DD} if=${BIOS_STAGE1_BIN} of=${MILLI_BIOS_IMAGE} bs=446 count=1 conv=notrunc
-        DEPENDS
-            bootloader_bios_stage1_bin
-            bootloader_bios_stage2_bin
-            kernel_elf
-            # ${INITRD_CPIO}
         VERBATIM
     )
-
-    add_custom_target(bios_image ALL DEPENDS "${MILLI_BIOS_IMAGE}")
+    add_dependencies(bios_image bootloader_bios_stage1_bin bootloader_bios_stage2_bin kernel_elf) # NOTE: In the future initrd
 elseif(BOOTLOADER STREQUAL "uefi")
     set(MILLI_UEFI_IMAGE "${CMAKE_BINARY_DIR}/milli-uefi.img")
 
-    add_custom_command(
-        OUTPUT "${MILLI_UEFI_IMAGE}"
+    add_custom_target(uefi_image ALL
+        BYPRODUCTS "${MILLI_UEFI_IMAGE}"
         COMMAND ${DD} if=/dev/zero of=${MILLI_UEFI_IMAGE} bs=1048576 count=${MILLI_IMAGE_SIZE_MIB}
-        COMMAND ${PARTED} --script ${MILLI_UEFI_IMAGE}
-            mklabel gpt
-            mkpart ESP fat32 1MiB 100%
-            set 1 esp on
+        COMMAND ${SGDISK} --clear
+            --new=1:${MILLI_PARTITION_START_SECTOR}:0
+            --typecode=1:ef00
+            --change-name=1:ESP
+            ${MILLI_UEFI_IMAGE}
         COMMAND ${MKFS_FAT} --offset=${MILLI_PARTITION_START_SECTOR} -F 32 ${MILLI_UEFI_IMAGE}
         COMMAND ${MMD} -i ${MILLI_UEFI_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES} ::/EFI
         COMMAND ${MMD} -i ${MILLI_UEFI_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES} ::/EFI/BOOT
@@ -136,14 +132,9 @@ elseif(BOOTLOADER STREQUAL "uefi")
             $<TARGET_FILE:kernel_elf> ::/BOOT/KERNEL.ELF
         # COMMAND ${MCOPY} -i ${MILLI_UEFI_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES}
         #     ${INITRD_CPIO} ::/BOOT/INITRD.CPI
-        DEPENDS
-            bootloader_uefi_efi
-            kernel_elf
-            # ${INITRD_CPIO}
         VERBATIM
     )
-
-    add_custom_target(uefi_image ALL DEPENDS "${MILLI_UEFI_IMAGE}")
+    add_dependencies(uefi_image bootloader_uefi_efi kernel_elf) # NOTE: In the future initrd
 endif()
 
 # ----------------------------------------------------------------

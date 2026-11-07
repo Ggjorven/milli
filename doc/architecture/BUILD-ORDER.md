@@ -47,23 +47,24 @@ This is again dependant on which boot platform is used.
 
 ### BIOS (Legacy boot)
 
-The BIOS image is an MBR-partitioned disk with this layout:
+The BIOS image uses a GPT partition table with a protective MBR. Stage 1 occupies the
+protective MBR's boot-code area, while the FAT32 partition starts at sector 2048:
 
 | Sector | Contents |
 | -- | -- |
-| `0` | MBR: stage-1 code (446 bytes), partition table & 0x55AA signature |
+| `0` | Protective MBR: stage-1 code (446 bytes), GPT protective partition & 0x55AA signature |
 | `1-2047` | Stage-2 code |
 | `2048+` | FAT 32 partition: <br>├── /BOOT/KERNEL.ELF<br>└── /BOOT/INITRD.CPI |
 
 The MBR layout fixes the stage-1 bootstrap area at 446 bytes even though a sector is 512 bytes.
-The partition table on MBR contains four 16-byte entries (64 bytes), the boot signature is 2 bytes (`0x55AA`).
-Only one of these 4 partitions is used (the FAT 32 partition).
-Therefore the available code space is `512 - (4 * 16) - 2 = 446` bytes.
+The partition table contains four 16-byte entries (64 bytes), and the boot signature is 2 bytes
+(`0x55AA`). The protective entry preserves the GPT partition table, so the available code space is
+`512 - (4 * 16) - 2 = 446` bytes.
 
 For the BIOS image, CMake currently does this order:
 
 1. Create a zero-filled `.img` file (by default `64MiB`).
-2. Create the MBR partition table.
+2. Create the GPT partition table and its protective MBR.
 3. Format the partition at sector 2048 as FAT32.
 4. Copy KERNEL.ELF and INITRD.CPI into that FAT32 filesystem.
 5. Write stage 2 at sector 1.

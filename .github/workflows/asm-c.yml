@@ -142,6 +142,18 @@ jobs:
             build-preset: x86_64-release
             bootloader: bios
             bootloader-name: BIOS
+          - name: debug
+            os: macos-26
+            configure-preset: x86_64-debug
+            build-preset: x86_64-debug
+            bootloader: uefi
+            bootloader-name: UEFI
+          - name: release
+            os: macos-26
+            configure-preset: x86_64-release
+            build-preset: x86_64-release
+            bootloader: uefi
+            bootloader-name: UEFI
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -153,7 +165,7 @@ jobs:
           sudo apt-get install --yes --no-install-recommends \
             cmake make build-essential bison flex \
             libgmp3-dev libisl-dev libmpc-dev libmpfr-dev texinfo curl \
-            dosfstools mtools parted qemu-system-x86
+            dosfstools mtools gdisk qemu-system-x86
         if: ${{ matrix.os == 'ubuntu-24.04' }}
 
       - name: Set up Homebrew
@@ -164,7 +176,7 @@ jobs:
         timeout-minutes: 10
         run: |
           brew install cmake make bison flex gmp isl libmpc mpfr texinfo \
-            curl qemu dosfstools mtools
+            curl qemu dosfstools mtools gptfdisk
         if: ${{ matrix.os == 'macos-26' }}
 
       - name: Restore cross-compiler cache
@@ -219,7 +231,7 @@ jobs:
         sudo apt-get install --yes --no-install-recommends \
           cmake make build-essential \
           libgmp3-dev libisl-dev libmpc-dev libmpfr-dev \
-          dosfstools mtools parted \
+          dosfstools mtools gdisk \
           clang-tidy clang-format
 
     - name: Configure BIOS lint database

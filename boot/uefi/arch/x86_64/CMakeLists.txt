@@ -29,7 +29,7 @@ find_program(UEFI_OBJCOPY NAMES x86_64-w64-mingw32-objcopy mingw-objcopy objcopy
 add_custom_command(
     OUTPUT ${UEFI_EFI_FILE}
     COMMAND ${UEFI_OBJCOPY} -O pei-x86-64 --subsystem 10 $<TARGET_FILE:${UEFI_TARGET}> ${UEFI_EFI_FILE}
-    DEPENDS ${UEFI_TARGET}
+    # DEPENDS ${UEFI_TARGET} # TARGET_FILE creates an implicit DEPENDS
     VERBATIM
 )
 add_custom_target(bootloader_uefi_efi ALL DEPENDS ${UEFI_EFI_FILE})

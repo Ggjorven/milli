@@ -74,17 +74,17 @@ jobs:
           sudo apt-get install --yes --no-install-recommends \
             make build-essential bison flex \
             libgmp3-dev libisl-dev libmpc-dev libmpfr-dev texinfo curl
-        if: ${{ matrix.os == 'ubuntu-24.04' }} && steps.cross-compiler-cache.outputs.cache-hit != 'true'
+        if: ${{ matrix.os == 'ubuntu-24.04' }} && (steps.cross-compiler-cache.outputs.cache-hit != 'true')
 
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@2026.11.02.1
-        if: ${{ matrix.os == 'macos-26' }} && steps.cross-compiler-cache.outputs.cache-hit != 'true'
+        if: ${{ matrix.os == 'macos-26' }} && (steps.cross-compiler-cache.outputs.cache-hit != 'true')
 
       - name: Install cross-compiler dependencies on MacOS
         timeout-minutes: 10
         run: |
           brew install make bison flex gmp isl libmpc mpfr texinfo curl
-        if: ${{ matrix.os == 'macos-26' }} && steps.cross-compiler-cache.outputs.cache-hit != 'true'
+        if: ${{ matrix.os == 'macos-26' }} && (steps.cross-compiler-cache.outputs.cache-hit != 'true')
 
       - name: Build cross-compiler for x86_64
         if: steps.cross-compiler-cache.outputs.cache-hit != 'true'

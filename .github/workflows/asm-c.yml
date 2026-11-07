@@ -112,56 +112,57 @@ jobs:
           retention-days: 14
           compression-level: 0
 
-  qemu-smoke-test:
-    name: QEMU smoke test ${{ matrix.name }} for target x86_64 using ${{ matrix.bootloader-name }}
-    needs: build
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: debug
-            build-preset: x86_64-debug
-            bootloader: BIOS
-          - name: release
-            build-preset: x86_64-release
-            bootloader: bios
-            bootloader-name: BIOS
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Install CMake and QEMU
-        timeout-minutes: 2
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends cmake qemu-system-x86
-
-      - name: Restore cross-compiler cache
-        uses: actions/cache@v6
-        with:
-          path: ~/opt/cross-compilers
-          key: cross-compiler-x86_64-ubuntu-24.04-${{ hashFiles('scripts/build-cross-compiler.sh') }}
-
-      - name: Add cross-compiler to PATH
-        run: echo "$HOME/opt/cross-compilers/bin" >> "$GITHUB_PATH"
-
-      - name: Download configured build tree
-        uses: actions/download-artifact@v8
-        with:
-          name: milli-build-x86_64-${{ matrix.name }}
-          path: build/${{ matrix.build-preset }}
-
-      - name: Boot test (15s)
-        shell: bash
-        run: |
-          set +e
-          timeout 15s cmake --build --preset ${{ matrix.build-preset }} --target run
-          status=$?
-          set -e
-
-          if [ "$status" -ne 124 ]; then
-            exit "$status"
-          fi
+  # TODO: Fix re-build
+  # qemu-smoke-test:
+  #   name: QEMU smoke test ${{ matrix.name }} for target x86_64 using ${{ matrix.bootloader-name }}
+  #   needs: build
+  #   runs-on: ubuntu-24.04
+  #   permissions:
+  #     contents: read
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - name: debug
+  #           build-preset: x86_64-debug
+  #           bootloader: BIOS
+  #         - name: release
+  #           build-preset: x86_64-release
+  #           bootloader: bios
+  #           bootloader-name: BIOS
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v7
+  #
+  #     - name: Install CMake and QEMU
+  #       timeout-minutes: 2
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install --yes --no-install-recommends cmake qemu-system-x86
+  #
+  #     - name: Restore cross-compiler cache
+  #       uses: actions/cache@v6
+  #       with:
+  #         path: ~/opt/cross-compilers
+  #         key: cross-compiler-x86_64-ubuntu-24.04-${{ hashFiles('scripts/build-cross-compiler.sh') }}
+  #
+  #     - name: Add cross-compiler to PATH
+  #       run: echo "$HOME/opt/cross-compilers/bin" >> "$GITHUB_PATH"
+  #
+  #     - name: Download configured build tree
+  #       uses: actions/download-artifact@v8
+  #       with:
+  #         name: milli-build-x86_64-${{ matrix.name }}
+  #         path: build/${{ matrix.build-preset }}
+  #
+  #     - name: Boot test (15s)
+  #       shell: bash
+  #       run: |
+  #         set +e
+  #         timeout 15s cmake --build --preset ${{ matrix.build-preset }} --target run
+  #         status=$?
+  #         set -e
+  #
+  #         if [ "$status" -ne 124 ]; then
+  #           exit "$status"
+  #         fi

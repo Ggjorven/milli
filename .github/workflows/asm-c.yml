@@ -3,7 +3,7 @@ name: ASM & C
 on:
   push:
     branches: [ "main", "dev", "feature/**", "fix/**" ]
-    paths:
+    paths: # NOTE: All code folders need to be manually put here
       - ".github/workflows/asm-c.yml"
       - "boot/**"
       - "initrd/**"
@@ -12,7 +12,7 @@ on:
       - "CMakePresets.json"
   pull_request:
     branches: [ "main", "dev" ]
-    paths:
+    paths: # NOTE: All code folders need to be manually put here
       - ".github/workflows/asm-c.yml"
       - "boot/**"
       - "initrd/**"
@@ -141,11 +141,59 @@ jobs:
       - name: Upload configured build tree
         uses: actions/upload-artifact@v7
         with:
-          name: milli-build-x86_64-${{ matrix.name }}
+          name: milli-build-x86_64-${{ matrix.os }}-${{ matrix.name }}-${{ matrix.bootloader }}
           path: build/${{ matrix.configure-preset }}
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
+
+  lint-clang:
+    name: Lint (clang)
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v7
+
+    - name: Restore cross-compiler cache
+      uses: actions/cache@v6
+      with:
+        path: ~/opt/cross-compilers
+        key: cross-compiler-x86_64-ubuntu-24.04-${{ hashFiles('scripts/build-cross-compiler.sh') }}
+
+    - name: Add cross-compiler to PATH
+      run: echo "$HOME/opt/cross-compilers/bin" >> "$GITHUB_PATH"
+
+    - name: Download debug BIOS build metadata
+      uses: actions/download-artifact@v8
+      with:
+        name: milli-build-x86_64-ubuntu-24.04-debug-bios
+        path: build/x86_64-debug
+
+    - name: Install clang tools
+      run: sudo apt-get install --yes --no-install-recommends clang-tidy clang-format
+
+    # NOTE: All code folders need to be manually put here
+    - name: Run clang-tidy
+      id: tidy-job
+      run: |
+        find boot kernel -type f -name '*.c' -print0 |
+        xargs -0 -r clang-tidy -p build/x86_64-debug
+      continue-on-error: true
+
+    # NOTE: All code folders need to be manually put here
+    - name: Run clang-format
+      id: format-job
+      run: |
+        find boot kernel -type f \( -name '*.c' -o -name '*.h' \) -print0 |
+        xargs -0 -r clang-format --dry-run --Werror
+      continue-on-error: true
+
+    - name: Fail on lint error
+      if: steps.tidy-job.outcome == 'failure' || steps.format-job.outcome == 'failure'
+      run: exit 1
 
   # TODO: Fix re-build
   # qemu-smoke-test:
@@ -187,7 +235,7 @@ jobs:
   #     - name: Download configured build tree
   #       uses: actions/download-artifact@v8
   #       with:
-  #         name: milli-build-x86_64-${{ matrix.name }}
+  #         name: milli-build-x86_64-ubuntu-24.04-${{ matrix.name }}-${{ matrix.bootloader }}
   #         path: build/${{ matrix.build-preset }}
   #
   #     - name: Boot test (15s)

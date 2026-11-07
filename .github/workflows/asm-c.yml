@@ -8,6 +8,7 @@ on:
       - "boot/**"
       - "initrd/**"
       - "kernel/**"
+      - "scripts/build-cross-compiler.sh"
       - "CMakeLists.txt"
       - "CMakePresets.json"
   pull_request:
@@ -17,6 +18,7 @@ on:
       - "boot/**"
       - "initrd/**"
       - "kernel/**"
+      - "scripts/build-cross-compiler.sh"
       - "CMakeLists.txt"
       - "CMakePresets.json"
 

@@ -89,7 +89,7 @@ set(MILLI_IMAGE_SIZE_MIB 64 CACHE STRING "Size of generated disk images in MiB")
 # So, stage 2 code must come after that.
 set(MILLI_BIOS_STAGE2_START_SECTOR 34)
 set(MILLI_PARTITION_START_SECTOR 2048)
-
+math(EXPR MILLI_BIOS_STAGE2_MAX_SECTORS "${MILLI_PARTITION_START_SECTOR} - ${MILLI_BIOS_STAGE2_START_SECTOR}")
 math(EXPR MILLI_PARTITION_OFFSET_BYTES "${MILLI_PARTITION_START_SECTOR} * 512") # Each sector is 512 bytes
 
 if(BOOTLOADER STREQUAL "bios")
@@ -109,6 +109,11 @@ if(BOOTLOADER STREQUAL "bios")
             $<TARGET_FILE:kernel_elf> ::/BOOT/KERNEL.ELF
         # COMMAND ${MCOPY} -i ${MILLI_BIOS_IMAGE}@@${MILLI_PARTITION_OFFSET_BYTES}
         #     ${INITRD_CPIO} ::/BOOT/INITRD.CPI
+        COMMAND ${CMAKE_COMMAND}
+            -DINPUT_FILE=${BIOS_STAGE2_BIN}
+            -DSECTOR_SIZE_BYTES=512
+            -DMAX_SECTORS=${MILLI_BIOS_STAGE2_MAX_SECTORS}
+            -P ${PROJECT_SOURCE_DIR}/cmake/scripts/bios_stage2_size_check.cmake
         COMMAND ${DD} if=${BIOS_STAGE2_BIN} of=${MILLI_BIOS_IMAGE}
             bs=512 seek=${MILLI_BIOS_STAGE2_START_SECTOR} conv=notrunc
         COMMAND ${DD} if=${BIOS_STAGE1_BIN} of=${MILLI_BIOS_IMAGE} bs=446 count=1 conv=notrunc

@@ -3,8 +3,22 @@ name: ASM & C
 on:
   push:
     branches: [ "main", "dev", "feature/**", "fix/**" ]
+    paths:
+      - ".github/workflows/asm-c.yml"
+      - "boot/**"
+      - "initrd/**"
+      - "kernel/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
   pull_request:
     branches: [ "main", "dev" ]
+    paths:
+      - ".github/workflows/asm-c.yml"
+      - "boot/**"
+      - "initrd/**"
+      - "kernel/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
 
 jobs:
   lint-codeql:

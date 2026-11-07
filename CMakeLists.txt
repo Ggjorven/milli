@@ -150,6 +150,8 @@ endif()
 # Create run and run-debug targets (arch specific)
 # ----------------------------------------------------------------
 if(QEMU)
+    set(MILLI_RUN_TARGETS_AVAILABLE true)
+
     if(ARCHITECTURE STREQUAL "x86_64")
         set(QEMU_COMMON_ARGS -M q35 -m 512M -serial stdio -no-reboot -no-shutdown)
         if(RUN_HEADLESS)
@@ -172,27 +174,32 @@ if(QEMU)
                     set(OVMF "/usr/share/edk2/x64/OVMF_CODE.fd" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)" FORCE) # Arch
                 elseif(EXISTS "/opt/homebrew/share/qemu/edk2-x86_64-code.fd")
                     set(OVMF "/opt/homebrew/share/qemu/edk2-x86_64-code.fd" CACHE FILEPATH "Path to UEFI firmware image (OVMF.fd)" FORCE) # MacOS Homebrew
-                else()
-                    message(FATAL_ERROR "No x86_64 OVMF firmware was found. Install OVMF or configure with -DOVMF=/path/to/OVMF_CODE.fd.")
                 endif()
             endif()
 
-            set(MILLI_IMAGE "${MILLI_UEFI_IMAGE}")
-            set(MILLI_IMAGE_TARGET uefi_image)
-            set(MILLI_QEMU_BOOT_ARGS -bios ${OVMF} -drive format=raw,file=${MILLI_IMAGE})
+            if(OVMF AND EXISTS "${OVMF}")
+                set(MILLI_IMAGE "${MILLI_UEFI_IMAGE}")
+                set(MILLI_IMAGE_TARGET uefi_image)
+                set(MILLI_QEMU_BOOT_ARGS -bios ${OVMF} -drive format=raw,file=${MILLI_IMAGE})
+            else()
+                message(WARNING "No x86_64 OVMF firmware was found, so run and run-debug targets are not available. Install OVMF or configure with -DOVMF=/path/to/OVMF_CODE.fd.")
+                set(MILLI_RUN_TARGETS_AVAILABLE false)
+            endif()
         endif()
     else()
         message(FATAL_ERROR "No QEMU run configuration exists for ARCHITECTURE=${ARCHITECTURE}.")
     endif()
 
-    add_custom_target(run
-        COMMAND ${QEMU} ${QEMU_COMMON_ARGS} ${MILLI_QEMU_BOOT_ARGS}
-        DEPENDS ${MILLI_IMAGE_TARGET}
-        USES_TERMINAL
-    )
-    add_custom_target(run-debug
-        COMMAND ${QEMU} ${QEMU_COMMON_ARGS} ${MILLI_QEMU_BOOT_ARGS} -s -S
-        DEPENDS ${MILLI_IMAGE_TARGET}
-        USES_TERMINAL
-    )
+    if(MILLI_RUN_TARGETS_AVAILABLE)
+        add_custom_target(run
+            COMMAND ${QEMU} ${QEMU_COMMON_ARGS} ${MILLI_QEMU_BOOT_ARGS}
+            DEPENDS ${MILLI_IMAGE_TARGET}
+            USES_TERMINAL
+        )
+        add_custom_target(run-debug
+            COMMAND ${QEMU} ${QEMU_COMMON_ARGS} ${MILLI_QEMU_BOOT_ARGS} -s -S
+            DEPENDS ${MILLI_IMAGE_TARGET}
+            USES_TERMINAL
+        )
+    endif()
 endif()

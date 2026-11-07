@@ -97,7 +97,7 @@ jobs:
           "$HOME/opt/cross-compilers/bin/x86_64-elf-gcc" --version
 
   build:
-    name: Build ${{ matrix.name }} for target x86_64 with ${{ matrix.bootloader-name }} bootloader on ${{ matrix.os }}
+    name: Build x86_64 ${{ matrix.configuration }} with ${{ matrix.bootloader }} on ${{ matrix.os }}
     needs: toolchains
     runs-on: ${{ matrix.os }}
     permissions:
@@ -105,55 +105,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: debug
-            os: ubuntu-24.04
-            configure-preset: x86_64-debug
-            build-preset: x86_64-debug
-            bootloader: bios
-            bootloader-name: BIOS
-          - name: debug
-            os: ubuntu-24.04
-            configure-preset: x86_64-debug
-            build-preset: x86_64-debug
-            bootloader: uefi
-            bootloader-name: UEFI
-          - name: release
-            os: ubuntu-24.04
-            configure-preset: x86_64-release
-            build-preset: x86_64-release
-            bootloader: bios
-            bootloader-name: BIOS
-          - name: release
-            os: ubuntu-24.04
-            configure-preset: x86_64-release
-            build-preset: x86_64-release
-            bootloader: uefi
-            bootloader-name: UEFI
-          - name: debug
-            os: macos-26
-            configure-preset: x86_64-debug
-            build-preset: x86_64-debug
-            bootloader: bios
-            bootloader-name: BIOS
-          - name: release
-            os: macos-26
-            configure-preset: x86_64-release
-            build-preset: x86_64-release
-            bootloader: bios
-            bootloader-name: BIOS
-          - name: debug
-            os: macos-26
-            configure-preset: x86_64-debug
-            build-preset: x86_64-debug
-            bootloader: uefi
-            bootloader-name: UEFI
-          - name: release
-            os: macos-26
-            configure-preset: x86_64-release
-            build-preset: x86_64-release
-            bootloader: uefi
-            bootloader-name: UEFI
+        os: [ubuntu-24.04, macos-26]
+        configuration: [debug, release]
+        bootloader: [bios, uefi]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -192,16 +146,16 @@ jobs:
         run: x86_64-elf-gcc --version
 
       - name: Configure CMake
-        run: cmake --preset ${{ matrix.configure-preset }} -DRUN_HEADLESS=ON -DBOOTLOADER=${{ matrix.bootloader }}
+        run: cmake --preset x86_64-${{ matrix.configuration }} -DRUN_HEADLESS=ON -DBOOTLOADER=${{ matrix.bootloader }}
 
       - name: Build
-        run: cmake --build --preset ${{ matrix.build-preset }} --parallel
+        run: cmake --build --preset x86_64-${{ matrix.configuration }} --parallel
 
       - name: Upload configured build tree
         uses: actions/upload-artifact@v7
         with:
-          name: milli-build-x86_64-${{ matrix.os }}-${{ matrix.name }}-${{ matrix.bootloader }}
-          path: build/${{ matrix.configure-preset }}
+          name: milli-build-x86_64-${{ matrix.os }}-${{ matrix.configuration }}-${{ matrix.bootloader }}
+          path: build/x86_64-${{ matrix.configuration }}
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
@@ -278,7 +232,7 @@ jobs:
 
   # TODO: Fix re-build
   # qemu-smoke-test:
-  #   name: QEMU smoke test ${{ matrix.name }} for target x86_64 using ${{ matrix.bootloader-name }}
+  #   name: QEMU smoke test x86_64 ${{ matrix.configuration }} using ${{ matrix.bootloader }}
   #   needs: build
   #   runs-on: ubuntu-24.04
   #   permissions:
@@ -316,14 +270,14 @@ jobs:
   #     - name: Download configured build tree
   #       uses: actions/download-artifact@v8
   #       with:
-  #         name: milli-build-x86_64-ubuntu-24.04-${{ matrix.name }}-${{ matrix.bootloader }}
-  #         path: build/${{ matrix.build-preset }}
+  #         name: milli-build-x86_64-ubuntu-24.04-${{ matrix.configuration }}-${{ matrix.bootloader }}
+  #         path: build/x86_64-${{ matrix.configuration }}
   #
   #     - name: Boot test (15s)
   #       shell: bash
   #       run: |
   #         set +e
-  #         timeout 15s cmake --build --preset ${{ matrix.build-preset }} --target run
+  #         timeout 15s cmake --build --preset x86_64-${{ matrix.configuration }} --target run
   #         status=$?
   #         set -e
   #

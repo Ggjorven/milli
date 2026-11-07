@@ -97,7 +97,7 @@ jobs:
           "$HOME/opt/cross-compilers/bin/x86_64-elf-gcc" --version
 
   build:
-    name: Build x86_64 ${{ matrix.configuration }} with ${{ matrix.bootloader }} on ${{ matrix.os }}
+    name: Build x86_64 ${{ matrix.configuration }} with ${{ matrix.bootloader }} bootloader on ${{ matrix.os }}
     needs: toolchains
     runs-on: ${{ matrix.os }}
     permissions:

@@ -7,7 +7,6 @@ UseTab: Never
 ColumnLimit: 130
 
 ContinuationIndentWidth: 4
-BracedInitializerIndentWidth: -1
 PPIndentWidth: -1
 IndentCaseBlocks: false
 IndentCaseLabels: false
@@ -16,11 +15,8 @@ IndentGotoLabels: true
 IndentPPDirectives: None
 IndentWrappedFunctionNames: false
 MaxEmptyLinesToKeep: 1
-KeepEmptyLines:
-  AtEndOfFile: false
-  AtStartOfBlock: true
-  AtStartOfFile: true
-KeepFormFeed: false
+KeepEmptyLinesAtEOF: false
+KeepEmptyLinesAtTheStartOfBlocks: true
 LineEnding: LF
 InsertNewlineAtEOF: true
 
@@ -39,7 +35,6 @@ BraceWrapping:
   SplitEmptyFunction: true
   SplitEmptyRecord: true
 AllowShortBlocksOnASingleLine: Never
-AllowShortCaseExpressionOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortEnumsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
@@ -48,12 +43,9 @@ AllowShortLoopsOnASingleLine: false
 BreakBeforeBinaryOperators: None
 BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTernaryOperators: true
-BreakBinaryOperations: Never
-BreakFunctionDefinitionParameters: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
 BreakAfterAttributes: Leave
-BreakAfterReturnType: None
 BreakAdjacentStringLiterals: true
 BreakArrays: true
 BreakStringLiterals: true
@@ -102,7 +94,7 @@ AlignConsecutiveShortCaseStatements:
 AllowAllArgumentsOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 BinPackArguments: true
-BinPackLongBracedList: true
+BinPackParameters: true
 ExperimentalAutoDetectBinPacking: false
 
 BitFieldColonSpacing: Both
@@ -119,10 +111,9 @@ SpaceBeforeParensOptions:
   AfterControlStatements: true
   AfterFunctionDefinitionName: false
   AfterFunctionDeclarationName: false
-  AfterNot: false
   BeforeNonEmptyParentheses: false
 SpaceBeforeSquareBrackets: false
-SpaceInEmptyBraces: Never
+SpaceInEmptyBlock: false
 SpacesBeforeTrailingComments: 1
 SpacesInContainerLiterals: true
 SpacesInLineCommentPrefix:
@@ -130,7 +121,6 @@ SpacesInLineCommentPrefix:
   Maximum: -1
 SpacesInParens: Never
 SpacesInParensOptions:
-  ExceptDoubleParentheses: false
   InCStyleCasts: false
   InConditionalStatements: false
   InEmptyParentheses: false
@@ -141,27 +131,15 @@ ReflowComments: Always
 IncludeBlocks: Preserve
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
-MainIncludeChar: Quote
-SortIncludes:
-  Enabled: false
-  IgnoreCase: false
-  IgnoreExtension: false
+SortIncludes: Never
 MacroBlockBegin: ''
 MacroBlockEnd: ''
-OneLineFormatOffRegex: ''
 SkipMacroDefinitionBody: false
 
 DisableFormat: false
-EnumTrailingComma: Leave
 InsertBraces: false
-RemoveEmptyLinesInUnwrappedLines: false
 RemoveParentheses: Leave
 RemoveSemicolon: false
-NumericLiteralCase:
-  ExponentLetter: Leave
-  HexDigit: Leave
-  Prefix: Leave
-  Suffix: Leave
 IntegerLiteralSeparator:
   Binary: 0
   BinaryMinDigits: 0
@@ -195,11 +173,9 @@ Standard: c++20
 AccessModifierOffset: -4
 ConstructorInitializerIndentWidth: 4
 IndentAccessModifiers: false
-IndentExportBlock: true
 IndentRequiresClause: true
 NamespaceIndentation: All
 CompactNamespaces: false
-WrapNamespaceBodyWithEmptyLines: Leave
 
 BraceWrapping:
   AfterClass: true
@@ -209,12 +185,10 @@ BraceWrapping:
   SplitEmptyNamespace: true
 AllowShortCompoundRequirementOnASingleLine: true
 AllowShortLambdasOnASingleLine: All
-AllowShortNamespacesOnASingleLine: false
 BreakBeforeConceptDeclarations: Always
-BreakBeforeTemplateCloser: true
 BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: BeforeColon
-BreakTemplateDeclarations: MultiLine
+AlwaysBreakTemplateDeclarations: MultiLine
 AllowBreakBeforeNoexceptSpecifier: Never
 PackConstructorInitializers: BinPack
 RequiresClausePosition: OwnLine
@@ -223,7 +197,6 @@ RequiresExpressionIndentation: OuterScope
 Cpp11BracedListStyle: true
 LambdaBodyIndentation: Signature
 ReferenceAlignment: Pointer
-SpaceAfterOperatorKeyword: false
 SpaceAfterTemplateKeyword: true
 SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: true
@@ -244,7 +217,6 @@ EmptyLineBeforeAccessModifier: LogicalBlock
 InsertTrailingCommas: None
 ShortNamespaceLines: 1
 
-PenaltyBreakBeforeMemberAccess: 150
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakScopeResolution: 500
 PenaltyBreakTemplateDeclaration: 10

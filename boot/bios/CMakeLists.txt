@@ -4,14 +4,14 @@
 # Assembly executable (16-bit) (512 bytes)
 # ----------------------------------------------------------------
 add_executable(bootloader_bios_stage1_elf
-    stage1.S # Must be first
-    realmode.S
+    stage1/stage1.S
+    stage1/realmode.S
 )
 target_compile_options(bootloader_bios_stage1_elf PRIVATE -m16 -m32)
 target_link_options(bootloader_bios_stage1_elf PRIVATE
     -m32 -nostdlib -no-pie
     -Wl,-m,elf_i386
-    -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/stage1.ld
+    -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/stage1/stage1.ld
     -Wl,--build-id=none
 )
 
@@ -19,8 +19,8 @@ target_link_options(bootloader_bios_stage1_elf PRIVATE
 # C executable (64-bit)
 # ----------------------------------------------------------------
 add_executable(bootloader_bios_stage2_elf
-    transition.S
-    stage2.c
+    stage2/transition.S
+    stage2/stage2.c
 )
 configure_bootloader_target(bootloader_bios_stage2_elf)
 target_compile_options(bootloader_bios_stage2_elf PRIVATE
@@ -29,7 +29,7 @@ target_compile_options(bootloader_bios_stage2_elf PRIVATE
 target_link_options(bootloader_bios_stage2_elf PRIVATE
     -m32 -nostdlib -no-pie
     -Wl,-m,elf_i386
-    -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/stage2.ld
+    -Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/stage2/stage2.ld
     -Wl,--build-id=none
 )
 
